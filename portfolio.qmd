@@ -36,15 +36,15 @@ weights <- rep(0.2, 5)
 initial_investment <- 10000
 
 # Portfolio (YAHOO)
-portfolio <- data.frame("Equity" = stock_tickers, "Investment ($)" = stock_allocations)
-stock_allocations <- weights * initial_investment
+# portfolio <- data.frame("Equity" = stock_tickers, "Investment ($)" = stock_allocations)
+# stock_allocations <- weights * initial_investment
 
 # Treasury Yields (FRED)
 ten_year_treasury_yield_table = arrange(tq_get("DGS10", get = "economic.data"), desc(date))
 latest_ten_year_treasury_yield = slice(ten_year_treasury_yield_table, 1)$price
 
 print(latest_ten_year_treasury_yield)
-print(portfolio)
+# print(portfolio)
 ```
 
 Next, we turn to assembling our aggregation for our tech portfolio using historical returns for our specified time ranged mentioned earlier (segmented by monthly returns).
