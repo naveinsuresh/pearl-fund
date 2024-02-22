@@ -24,6 +24,7 @@ Be sure to have to following libraries installed and imported before proceeding:
 library(tidyquant)
 library(dplyr)
 library(ggplot2)
+library(PerformanceAnalytics)
 
 ```
 
@@ -53,7 +54,7 @@ Next, we turn to assembling our aggregation for our tech portfolio using histori
 
 stock_returns_monthly_raw <- tq_get(c("AMD", "INTC", "NVDA", "SMCI", "TSM"), get  = "stock.prices", from = "2004-01-01", to   = "2024-01-01")
 
-stock_returns_monthly = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
+stock_returns_monthly = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
 stock_returns_monthly
 ```
@@ -68,7 +69,13 @@ sp500_returns_monthly_raw <- tq_get("SPY", get = "stock.prices", from = "2004-01
 
 sp500_returns_monthly = tq_transmute(sp500_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
 
+
+# sp500_returns_monthly["Monthly Returns"] = sp500_returns_monthly["Monthly Returns"] * 100
+
+colnames(sp500_returns_monthly)[colnames(sp500_returns_monthly) == "Monthly Returns"] = "SPYMonthlyReturns "
+
 sp500_returns_monthly
+
 ```
 
 **NASDAQ COMPOSITE:**
@@ -79,5 +86,45 @@ nasdaq_returns_monthly_raw <- tq_get("^IXIC", get = "stock.prices", from = "2004
 
 nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
 
+# nasdaq_returns_monthly["Monthly Returns"] = nasdaq_returns_monthly["Monthly Returns"] * 100
+
+colnames(nasdaq_returns_monthly)[colnames(nasdaq_returns_monthly) == "Monthly Returns"] = "NASDAQMonthlyReturns"
+
 nasdaq_returns_monthly
+```
+
+Portfolio Aggregation for Return
+
+```{r}
+
+portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = MonthlyReturns, weights = weights, col_rename = "AggregateMonthlyReturns")
+
+# portfolio_monthly_returns["AggregateMonthlyReturns"] = portfolio_monthly_returns["AggregateMonthlyReturns"] * 100
+
+colnames(portfolio_monthly_returns)[colnames(portfolio_monthly_returns) == "AggregateMonthlyReturns"] = "AggregateMonthlyReturns"
+
+portfolio_monthly_returns
+
+```
+
+Now we move on with combining the returns of the the two baseline index funds with the returns of our tech portfolio.
+
+```{r}
+
+table_of_returns = left_join(portfolio_monthly_returns, nasdaq_returns_monthly, by="date")
+
+# table_of_returns = left_join(table_of_returns_A, nasdaq_returns_monthly, by="date")
+
+table_of_returns
+```
+
+Computing CAPM statistics & analytics
+
+```{r}
+
+statistics = table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = NASDAQMonthlyReturns
+, performance_fun = table.CAPM)
+
+statistics
+
 ```
