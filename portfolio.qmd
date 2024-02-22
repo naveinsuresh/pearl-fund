@@ -22,10 +22,8 @@ Be sure to have to following libraries installed and imported before proceeding:
 
 ```{r}
 library(tidyquant)
-library(dplyr)
+library(tidyverse)
 library(ggplot2)
-library(PerformanceAnalytics)
-
 ```
 
 Our testing time period will be from January 1, 2004 to January 1, 2024. This allows us to account for a range of economic situations — most notably the global financial crisis of 2008 and the SARS COVID-19 epidemic of 2020.
@@ -37,26 +35,35 @@ stock_tickers <- c("AMD", "INTC", "NVDA", "SMCI", "TSM")
 weights <- rep(0.2, 5)
 initial_investment <- 10000
 
+# Portfolio (YAHOO)
+portfolio <- data.frame("Equity" = stock_tickers, "Investment ($)" = stock_allocations)
+stock_allocations <- weights * initial_investment
+
+# Treasury Yields (FRED)
 ten_year_treasury_yield_table = arrange(tq_get("DGS10", get = "economic.data"), desc(date))
 latest_ten_year_treasury_yield = slice(ten_year_treasury_yield_table, 1)$price
 
-stock_allocations <- weights * initial_investment
-
-portfolio <- data.frame("Equity" = stock_tickers, "Investment ($)" = stock_allocations)
 print(latest_ten_year_treasury_yield)
 print(portfolio)
-
 ```
 
 Next, we turn to assembling our aggregation for our tech portfolio using historical returns for our specified time ranged mentioned earlier (segmented by monthly returns).
 
 ```{r}
 
-stock_returns_monthly_raw <- tq_get(c("AMD", "INTC", "NVDA", "SMCI", "TSM"), get  = "stock.prices", from = "2004-01-01", to   = "2024-01-01")
+# Raw Stock Monthly Returns
+stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to   = "2024-01-01")
 
+# Transformed Monthly Stock Returns
 stock_returns_monthly = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
 stock_returns_monthly
+```
+
+Below is a graph of the monthly closing prices for our tech portfolio stocks from Jan. 01, 2004 to Jan 01, 2024.
+
+```{r}
+ggplot(stock_returns_monthly_raw, aes(date, close, color=symbol)) + geom_line()
 ```
 
 Once we have our monthly historical stock returns for our time frame, we move to our two benchmark index funds, which we use as a comparison for our portfolio performance, *NASDAQ COMPOSITE (NYSE: \^IXIC)* *& SPDR S&P 500 ETF Trust (NYSE: SPY).* We pull the respective historical monthly returns once again for these two benchmarks.
@@ -65,46 +72,63 @@ Once we have our monthly historical stock returns for our time frame, we move to
 
 ```{r}
 
+# Raw S&P 500 Monthly Returns
 sp500_returns_monthly_raw <- tq_get("SPY", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
 
-sp500_returns_monthly = tq_transmute(sp500_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
+# Transformed S&P 500 Monthly Returns
+sp500_returns_monthly = tq_transmute(sp500_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
-
+### Transforms data into percentages ###
 # sp500_returns_monthly["Monthly Returns"] = sp500_returns_monthly["Monthly Returns"] * 100
 
-colnames(sp500_returns_monthly)[colnames(sp500_returns_monthly) == "Monthly Returns"] = "SPYMonthlyReturns "
+colnames(sp500_returns_monthly)[colnames(sp500_returns_monthly) == "MonthlyReturns"] = "SPYMonthlyReturns"
 
 sp500_returns_monthly
-
 ```
 
 **NASDAQ COMPOSITE:**
 
 ```{r}
 
-nasdaq_returns_monthly_raw <- tq_get("^IXIC", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
+# Raw NASDAQ Monthly Returns
+nasdaq_returns_monthly_raw <- tq_get("QQQ", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
 
-nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
+# Transformed NASDAQ Monthly Returns
+nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
+### Transforms data into percentages ###
 # nasdaq_returns_monthly["Monthly Returns"] = nasdaq_returns_monthly["Monthly Returns"] * 100
 
-colnames(nasdaq_returns_monthly)[colnames(nasdaq_returns_monthly) == "Monthly Returns"] = "NASDAQMonthlyReturns"
+colnames(nasdaq_returns_monthly)[colnames(nasdaq_returns_monthly) == "MonthlyReturns"] = "NASDAQMonthlyReturns"
 
 nasdaq_returns_monthly
 ```
 
-Portfolio Aggregation for Return
+The following shows the price trends visually for both the benchmark returns — SPY (light blue) & QQQ (orange).
 
 ```{r}
+# Combining benchmark raw dataframes
+benchmark_returns_raw = rbind(sp500_returns_monthly_raw, nasdaq_returns_monthly_raw)
+ggplot(benchmark_returns_raw, aes(date, close, color=symbol)) + geom_line()
+```
 
+Next we move on to aggregating the semiconductor stocks into a single portfolio return rate.
+
+```{r}
+# Aggregation function using tq_portfolio for monthly returns
 portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = MonthlyReturns, weights = weights, col_rename = "AggregateMonthlyReturns")
 
+### Transforms data into percentages ###
 # portfolio_monthly_returns["AggregateMonthlyReturns"] = portfolio_monthly_returns["AggregateMonthlyReturns"] * 100
 
 colnames(portfolio_monthly_returns)[colnames(portfolio_monthly_returns) == "AggregateMonthlyReturns"] = "AggregateMonthlyReturns"
 
 portfolio_monthly_returns
+```
 
+```{r}
+# 
+ggplot(portfolio_monthly_returns, aes(date, close, color=symbol)) + geom_line()
 ```
 
 Now we move on with combining the returns of the the two baseline index funds with the returns of our tech portfolio.
@@ -122,9 +146,10 @@ Computing CAPM statistics & analytics
 
 ```{r}
 
-statistics = table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = NASDAQMonthlyReturns
-, performance_fun = table.CAPM)
+statistics = table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = NASDAQMonthlyReturns, performance_fun = table.CAPM)
 
 statistics
 
 ```
+
+Multiple Portfolios
