@@ -128,7 +128,7 @@ portfolio_monthly_returns
 
 ```{r}
 # 
-ggplot(portfolio_monthly_returns, aes(date, close, color=symbol)) + geom_line()
+#ggplot(portfolio_monthly_returns, aes(date, close, color=symbol)) + geom_line()
 ```
 
 Now we move on with combining the returns of the the two baseline index funds with the returns of our tech portfolio.
@@ -152,4 +152,42 @@ statistics
 
 ```
 
-Multiple Portfolios
+```{r}
+portfolio_monthly_returns
+```
+
+```{r}
+portfolio_monthly_returns %>%
+    ggplot(aes(x = date, y = AggregateMonthlyReturns)) +
+    geom_bar(stat = "identity", fill = palette_light()[[1]]) +
+    labs(title = "Portfolio Returns",
+         subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM",
+         caption = "Shows an above-zero trend meaning positive returns",
+         x = "", y = "Monthly Returns") +
+    geom_smooth(method = "lm") +
+    theme_tq() +
+    scale_color_tq() +
+    scale_y_continuous(labels = scales::percent)
+```
+
+```{r}
+portfolio_growth_monthly <- stock_returns_monthly %>%
+    tq_portfolio(assets_col   = symbol, 
+                 returns_col  = MonthlyReturns, 
+                 weights = weights,
+                 col_rename   = "investment.growth",
+                 wealth.index = TRUE) %>%
+    mutate(investment.growth = investment.growth * 10000)
+
+portfolio_growth_monthly %>%
+    ggplot(aes(x = date, y = investment.growth)) +
+    geom_line(linewidth = 2, color = palette_light()[[1]]) +
+    labs(title = "Portfolio Growth",
+         subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM",
+         caption = "Now we can really visualize performance!",
+         x = "", y = "Portfolio Value") +
+    geom_smooth(method = "loess") +
+    theme_tq() +
+    scale_color_tq() +
+    scale_y_continuous(labels = scales::dollar)
+```
