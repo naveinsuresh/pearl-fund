@@ -206,59 +206,57 @@ statisticsB
 
 | ***Analysis & Commentary on the above metrics...***
 
-Multiple Portfolio Aggregation
+------------------------------------------------------------------------
+
+We extend this analysis to comparing multiple portfolios (with different asset weightings) against our benchmark indices. We utilize the mapping technique to achieve this. To begin, we extend our original returns table by creating an identical copy of our monthly historical returns to test our second portfolio. Notice how we now have our portfolio labeled by an index to distinguish.
 
 ```{r}
-map_of_weights <- tibble(
-    tickers = stock_tickers,
-    weights = weights1
-)
-
-map_of_weights
-```
-
-```{r}
-stock_returns_monthly %>%
-    tq_portfolio(assets_col  = symbol, 
-                 returns_col = MonthlyReturns, 
-                 weights     = map_of_weights, 
-                 col_rename  = "MappedMonthlyReturns")
-```
-
-Multiple Weights
-
-```{r}
-
-multiple_stock_returns_monthly <- stock_returns_monthly %>%
-    tq_repeat_df(n = 2)
+multiple_stock_returns_monthly <- stock_returns_monthly %>% tq_repeat_df(n = 2)
 multiple_stock_returns_monthly
 ```
 
+We now form a combined vector called *weights* which concactenates both our portfolio desired weights together.
+
 ```{r}
+# Combined Vector of Weights
 weights <- c(
     weights1,
     weights2
 )
-weights_portfolio_table <- tibble(stock_tickers) %>%
-    tq_repeat_df(n = 2) %>%
-    bind_cols(tibble(weights)) %>%
-    group_by(portfolio)
-weights_portfolio_table
+
+# Connecting our vector of weights with the relevant stocks and portfolio index
+portfolio_of_weights <- tibble(stock_tickers) %>% tq_repeat_df(n = 2) %>% bind_cols(tibble(weights)) %>% group_by(portfolio)
+
+portfolio_of_weights
 ```
 
-```{r}
+As usual, we now leverage the "*tq_portfolio()"* function to aggregate our returns for each of our portfolios.
 
+```{r}
 multiple_portfolio_returns_monthly <- multiple_stock_returns_monthly %>%
     tq_portfolio(assets_col  = symbol, 
                  returns_col = MonthlyReturns, 
-                 weights     = weights_portfolio_table, 
+                 weights     = portfolio_of_weights, 
                  col_rename  = "MultiplePortfolioMonthlyReturns")
 
 multiple_portfolio_returns_monthly
-
 ```
 
-Statistical Testing Multiple Portfolios
+You can visualize the portfolio returns below
+
+```{r}
+
+ggplot(multiple_portfolio_returns_monthly, aes(x = date, y = MultiplePortfolioMonthlyReturns, color = as.factor(portfolio))) +
+  geom_line() +
+  labs(title = "Portfolio 1 vs Portfolio 2 Historical Monthly Returns",
+       x = "Date",
+       y = "Monthly Returns",
+       color = "Portfolio") +
+  scale_color_manual(values = c("red", "green"))+
+  theme_minimal()
+```
+
+Finally to prepare for statistical metrics tests, we join the returns of the S&P 500 index with our portfolio returns — you can see the monthly returns side by side, indexed by each portfolio below.
 
 ```{r}
 
@@ -266,17 +264,16 @@ combined_benchmark_multiple_portfolio <- left_join(multiple_portfolio_returns_mo
                                      spy_returns_monthly,
                                      by = "date")
 combined_benchmark_multiple_portfolio
-
 ```
 
-CAPM Statistics
+Voila! You can find the relevant Capital Asset Pricing Model (CAPM) statistics for each portfolio (performance tested against the SPY benchmark index).
 
 ```{r}
 combined_benchmark_multiple_portfolio %>%
     tq_performance(Ra = MultiplePortfolioMonthlyReturns, Rb = SPYMonthlyReturns, performance_fun = table.CAPM)
 ```
 
-Sharpe Ratio Statistics
+A similar metrics table is shown below for the relevant Sharpe Ratio tests for our two portfolios.
 
 ```{r}
 combined_benchmark_multiple_portfolio %>%
