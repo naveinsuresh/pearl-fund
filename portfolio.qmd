@@ -279,3 +279,11 @@ A similar metrics table is shown below for the relevant Sharpe Ratio tests for o
 combined_benchmark_multiple_portfolio %>%
     tq_performance(Ra = MultiplePortfolioMonthlyReturns, Rb = NULL, performance_fun = SharpeRatio)
 ```
+
+------------------------------------------------------------------------
+
+> ***Analysis & Commentary on the above metrics...***
+
+------------------------------------------------------------------------
+
+These foundational analysis and statistical metrics will now help us as we move on to portfolio optimization. Drawing from the principles of Modern Portfolio Theory (MPT), we aim to optimize for the portfolio of assets which under a mean-variance form analysis, maximizes expected returns for a given level of risk-tolerance (standard deviation). We will be making use of concepts such as the efficient frontier model, efficient set mathematics, etc...
