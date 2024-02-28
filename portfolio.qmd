@@ -32,7 +32,7 @@ Our testing time period will be from January 1, 2004 to January 1, 2024. This al
 We begin with an equally weighted portfolio of the above stocks, each at 20% equity holding. For capital consideration, we will assume we start with \$10,000 (USD). You will also find us retrieving the recent 10-year treasury yields using the tidyquant functions.
 
 ```{r}
-stock_tickers <- c("AMD", "INTC", "NVDA", "SMCI", "TSM")
+stock_tickers <- c("AMD", "INTC", "NVDA", "QCOM", "TSM")
 weights1 <- rep(0.2, 5)
 weights2 = c(0.15, 0.1, 0.4, 0.25, 0.1)
 initial_investment <- 10000
@@ -132,7 +132,7 @@ aggregate_portfolio_monthly_returns
 The historical aggregate returns for our equally weighted tech portfolio is displayed below along with a trend line to track long term direction.
 
 ```{r}
-aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = AggregateMonthlyReturns)) + geom_bar(stat = "identity", fill = palette_light()[[1]]) + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + geom_smooth(method = "lm") + theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
+aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `Aggregate Monthly Returns`)) + geom_bar(stat = "identity", fill = palette_light()[[1]]) + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + geom_smooth(method = "lm") + theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
 
 You can also find the performance growth our portfolio over the 20 year timeline below along with a trend line to track general shape & direction.
@@ -140,7 +140,7 @@ You can also find the performance growth our portfolio over the 20 year timeline
 ```{r}
 aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly %>%
     tq_portfolio(assets_col = symbol, 
-                 returns_col= MonthlyReturns, 
+                 returns_col= `Monthly Returns`, 
                  weights = weights1,
                  col_rename   = "investment.growth",
                  wealth.index = TRUE) %>%
@@ -177,9 +177,9 @@ three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, 
 
 # Pearl Fund vs SPY vs NASDAQ
 ggplot(three_fund_combined_table_of_returns, aes(x = date)) +
-  geom_line(aes(y = AggregateMonthlyReturns, color = "Aggregate"), linetype = "solid", size = 1) +
-  geom_line(aes(y = SPYMonthlyReturns, color = "SPY"), linetype = "solid", size = 1) +
-  geom_line(aes(y = NASDAQMonthlyReturns, color = "NASDAQ"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `Aggregate Monthly Returns`, color = "Aggregate"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `SPY Monthly Returns`, color = "SPY"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `NASDAQ Monthly Returns`, color = "NASDAQ"), linetype = "solid", size = 1) +
   labs(title = "Monthly Returns Over Time", x = "Date", y = "Returns") +
   scale_linetype_manual(values = c("solid", "dashed", "dotted")) +
   scale_color_manual(values = c("Aggregate" = "blue", "SPY" = "red", "NASDAQ" = "black")) +
@@ -193,10 +193,10 @@ Finally, we compute several important statistical & financial measures for our p
 
 ```{r}
 # Pear Fund against SPY
-statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = SPYMonthlyReturns, performance_fun = table.CAPM)
+statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `Aggregate Monthly Returns`, Rb = `SPY Monthly Returns`, performance_fun = table.CAPM)
 
 # Pearl Fund against NASDAQ
-statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = NASDAQMonthlyReturns, performance_fun = table.CAPM)
+statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `Aggregate Monthly Returns`, Rb = `NASDAQ Monthly Returns`, performance_fun = table.CAPM)
 
 statisticsA
 statisticsB
@@ -287,3 +287,25 @@ combined_benchmark_multiple_portfolio %>%
 ------------------------------------------------------------------------
 
 These foundational analysis and statistical metrics will now help us as we move on to portfolio optimization. Drawing from the principles of Modern Portfolio Theory (MPT), we aim to optimize for the portfolio of assets which under a mean-variance form analysis, maximizes expected returns for a given level of risk-tolerance (standard deviation). We will be making use of concepts such as the efficient frontier model, efficient set mathematics, etc...
+
+```{r}
+
+Stock_Statistics = stock_returns_monthly %>% group_by(symbol)  %>% summarise(Expected_Returns = mean(`Monthly Returns`), Standard_Deviation = sd(`Monthly Returns`), Variance = VAR(`Monthly Returns`), Count = n())
+Stock_Statistics 
+```
+
+```{r}
+Excess_Return = Stock_Statistics$Expected_Returns - (latest_ten_year_treasury_yield/100)
+Excess_Return
+```
+
+```{r}
+Stock_Statistics = mutate(Stock_Statistics, Excess_Return = Excess_Return)
+Stock_Statistics
+```
+
+how do we make this more organised and efficient
+
+```{r}
+filter(stock_returns_monthly, symbol == "AMD")$`Monthly Returns` - filter(Stock_Statistics, symbol == "AMD")$Expected_Returns
+```
