@@ -13,7 +13,7 @@ Our objective in this project is to optimize a portfolio of stocks for risk-adju
 1.  *Advanced Micro Device, Inc. (NASDAQ: AMD)*
 2.  *Intel Corp. (NASDAQ: INTC)*
 3.  *NVIDIA Corp. (NASDAQ: NVDA)*
-4.  *Super Micro Computer Inc. (NASDAQ: SMCI)*
+4.  *QUALCOMM Inc. (NASDAQ: QCOM)*
 5.  *Taiwan Semiconductor Mfg. Co. Ltd. (NYSE: TSM)*
 
 We make use of various financial models, which we go into depth later on while also leverage the tidyquant package on R as our convenient tool for portfolio optimization. Using historical data, we will test our portfolio’s performance and compare it to the performance of two benchmark index funds — S&P 500 and NASDAQ.
@@ -57,7 +57,7 @@ Next, we turn to assembling our aggregation for our tech portfolio using histori
 stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to   = "2024-01-01")
 
 # Transformed Monthly Stock Returns
-stock_returns_monthly = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "Monthly Returns")
+stock_returns_monthly = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
 stock_returns_monthly
 ```
@@ -71,11 +71,11 @@ stock_returns_monthly_raw %>% group_by(symbol) %>% mutate(close = 100*close/firs
 You can also find the monthly returns under the same timeline for our stock selections.
 
 ```{r}
-stock_returns_monthly %>% ggplot(aes(date, `Monthly Returns`, color=symbol)) + geom_line()
+stock_returns_monthly %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + geom_line()
 ```
 
 ```{r}
-stock_returns_monthly %>% ggplot(aes(date, `Monthly Returns`, color=symbol)) + 
+stock_returns_monthly %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + 
   geom_line() +
   facet_wrap(~ symbol)
 ```
@@ -90,7 +90,7 @@ Once we have our monthly historical stock returns for our time frame, we move to
 spy_returns_monthly_raw <- tq_get("SPY", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
 
 # Transformed S&P 500 Monthly Returns
-spy_returns_monthly = tq_transmute(spy_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "SPY Monthly Returns")
+spy_returns_monthly = tq_transmute(spy_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "SPYMonthlyReturns")
 
 ### Transforms data into percentages ###
 # sp500_returns_monthly["Monthly Returns"] = sp500_returns_monthly["Monthly Returns"] * 100
@@ -106,7 +106,7 @@ spy_returns_monthly
 nasdaq_returns_monthly_raw <- tq_get("QQQ", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
 
 # Transformed NASDAQ Monthly Returns
-nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "NASDAQ Monthly Returns")
+nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "NASDAQMonthlyReturns")
 
 ### Transforms data into percentages ###
 # nasdaq_returns_monthly["Monthly Returns"] = nasdaq_returns_monthly["Monthly Returns"] * 100
@@ -127,7 +127,7 @@ Next, we aggregate the semiconductor stocks into a single portfolio with a combi
 
 ```{r}
 # Aggregation function using tq_portfolio() for monthly returns
-aggregate_portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = `Monthly Returns`, weights = weights1, col_rename = "Aggregate Monthly Returns")
+aggregate_portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = `MonthlyReturns`, weights = weights1, col_rename = "AggregateMonthlyReturns")
 
 ### Transforms data into percentages ###
 # portfolio_monthly_returns["AggregateMonthlyReturns"] = portfolio_monthly_returns["AggregateMonthlyReturns"] * 100
@@ -138,11 +138,11 @@ aggregate_portfolio_monthly_returns
 The historical aggregate returns for our equally weighted tech portfolio is displayed below along with a trend line to track long term direction.
 
 ```{r}
-aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `Aggregate Monthly Returns`)) + geom_bar(stat = "identity", fill = palette_light()[[1]]) + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + geom_smooth(method = "lm") + theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
+aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_bar(stat = "identity", fill = palette_light()[[1]]) + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + geom_smooth(method = "lm") + theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
 
 ```{r}
-aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `Aggregate Monthly Returns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
+aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
   geom_smooth(method = "loess") + 
   theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
@@ -152,7 +152,7 @@ You can also find the performance growth our portfolio over the 20 year timeline
 ```{r}
 aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly %>%
     tq_portfolio(assets_col = symbol, 
-                 returns_col= `Monthly Returns`, 
+                 returns_col= `MonthlyReturns`, 
                  weights = weights1,
                  col_rename   = "investment.growth",
                  wealth.index = TRUE) %>%
@@ -189,9 +189,9 @@ three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, 
 
 # Pearl Fund vs SPY vs NASDAQ
 ggplot(three_fund_combined_table_of_returns, aes(x = date)) +
-  geom_line(aes(y = `Aggregate Monthly Returns`, color = "Aggregate"), linetype = "solid", size = 1) +
-  geom_line(aes(y = `SPY Monthly Returns`, color = "SPY"), linetype = "solid", size = 1) +
-  geom_line(aes(y = `NASDAQ Monthly Returns`, color = "NASDAQ"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `AggregateMonthlyReturns`, color = "Aggregate"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `SPYMonthlyReturns`, color = "SPY"), linetype = "solid", size = 1) +
+  geom_line(aes(y = `NASDAQMonthlyReturns`, color = "NASDAQ"), linetype = "solid", size = 1) +
   labs(title = "Monthly Returns Over Time", x = "Date", y = "Returns") +
   scale_linetype_manual(values = c("solid", "dashed", "dotted")) +
   scale_color_manual(values = c("Aggregate" = "blue", "SPY" = "red", "NASDAQ" = "black")) +
@@ -216,10 +216,10 @@ Finally, we compute several important statistical & financial measures for our p
 
 ```{r}
 # Pear Fund against SPY
-#statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `Aggregate Monthly Returns`, Rb = `SPY Monthly Returns`, performance_fun = table.CAPM)
+statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `SPYMonthlyReturns`, performance_fun = table.CAPM)
 
 # Pearl Fund against NASDAQ
-statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `Aggregate Monthly Returns`, Rb = `NASDAQ Monthly Returns`, performance_fun = table.CAPM)
+statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
 
 statisticsA
 statisticsB
@@ -238,7 +238,7 @@ multiple_stock_returns_monthly <- stock_returns_monthly %>% tq_repeat_df(n = 2)
 multiple_stock_returns_monthly
 ```
 
-We now form a combined vector called *weights* which concactenates both our portfolio desired weights together.
+We now form a combined vector called *weights* which concatenates both our portfolio desired weights together.
 
 ```{r}
 # Combined Vector of Weights
@@ -258,7 +258,7 @@ As usual, we now leverage the "*tq_portfolio()"* function to aggregate our retur
 ```{r}
 multiple_portfolio_returns_monthly <- multiple_stock_returns_monthly %>%
     tq_portfolio(assets_col  = symbol, 
-                 returns_col = `Monthly Returns`, 
+                 returns_col = `MonthlyReturns`, 
                  weights     = portfolio_of_weights, 
                  col_rename  = "MultiplePortfolioMonthlyReturns")
 
@@ -293,7 +293,7 @@ Voila! You can find the relevant Capital Asset Pricing Model (CAPM) statistics f
 
 ```{r}
 combined_benchmark_multiple_portfolio %>%
-    tq_performance(Ra = MultiplePortfolioMonthlyReturns, Rb = `SPY Monthly Returns`, performance_fun = table.CAPM)
+    tq_performance(Ra = MultiplePortfolioMonthlyReturns, Rb = `SPYMonthlyReturns`, performance_fun = table.CAPM)
 ```
 
 A similar metrics table is shown below for the relevant Sharpe Ratio tests for our two portfolios.
@@ -313,7 +313,7 @@ These foundational analysis and statistical metrics will now help us as we move 
 
 ```{r}
 
-Stock_Statistics = stock_returns_monthly %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`Monthly Returns`), Standard_Deviation = sd(`Monthly Returns`), Variance = VAR(`Monthly Returns`), Count = n())
+Stock_Statistics = stock_returns_monthly %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`MonthlyReturns`), Standard_Deviation = sd(`MonthlyReturns`), Variance = VAR(`MonthlyReturns`), Count = n())
 Stock_Statistics 
 ```
 
@@ -327,58 +327,8 @@ Stock_Statistics = mutate(Stock_Statistics, Excess_Return = Excess_Return)
 Stock_Statistics
 ```
 
-how do we make this more organised and efficient
-
 ```{r}
-new_table = data.frame( symbol = c("AMD"), `Monthly Excess Returns` = filter(stock_returns_monthly, symbol == "AMD")$`Monthly Returns` - filter(Stock_Statistics, symbol == "AMD")$Expected_Returns)
-new_table 
-```
-
-```{r}
-new_table1 = data.frame( symbol = c("INTC"), `Monthly Excess Returns` = filter(stock_returns_monthly, symbol == "INTC")$`Monthly Returns` - filter(Stock_Statistics, symbol == "INTC")$Expected_Returns)
-new_table1
-```
-
-```{r}
-new_table2 = data.frame( symbol = c("AMD", "INTC", "NVDA", "QCOM", "TSM"), `Monthly Excess Returns` = stock_returns_monthly$`Monthly Returns` - Stock_Statistics$Expected_Returns)
-new_table2
-```
-
-```{r}
-new_table3 = data.frame( symbol = c("NVDA"), `Monthly Excess Returns` = filter(stock_returns_monthly, symbol == "NVDA")$`Monthly Returns` - filter(Stock_Statistics, symbol == "NVDA")$Expected_Returns)
-new_table3
-```
-
-```{r}
-new_table4 = data.frame( symbol = c("QCOM"), `Monthly Excess Returns` = filter(stock_returns_monthly, symbol == "QCOM")$`Monthly Returns` - filter(Stock_Statistics, symbol == "QCOM")$Expected_Returns)
-new_table4
-```
-
-```{r}
-new_table5 = data.frame( symbol = c("TSM"), `Monthly Excess Returns` = filter(stock_returns_monthly, symbol == "TSM")$`Monthly Returns` - filter(Stock_Statistics, symbol == "TSM")$Expected_Returns)
-new_table5
-```
-
-```{r}
-TableX = rbind(new_table, new_table1, new_table3, new_table4, new_table5)
-TableX
-```
-
-```{r}
-X = matrix(TableX)
-X
-```
-
-```{r}
-n <- 240
-tX <- t(X)
-var_cov_mat <- (tX %*% X) / (n - 1)
-
-var_cov_mat
-```
-
-```{r}
-returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `Monthly Returns` - Historic_Expected_Returns)
+returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
 
 excess_monthly_returns_table <- returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
 excess_monthly_returns_table
