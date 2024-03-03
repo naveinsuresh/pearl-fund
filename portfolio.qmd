@@ -1,7 +1,7 @@
 ---
 title: "Portfolio Optimization"
 author: "Navein Suresh, Suryaveer Singh"
-date: "~"
+date: Sys.date()
 format: html
 editor: visual
 ---
@@ -65,14 +65,10 @@ stock_returns_monthly
 Below is a graph of the monthly closing prices for our tech portfolio stocks from Jan. 01, 2004 to Jan 01, 2024. We have standardized the data to allow for proper time series analysis.
 
 ```{r}
-stock_returns_monthly_raw %>% group_by(symbol) %>% mutate(close = 100*close/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
+stock_returns_monthly_raw %>% group_by(symbol) %>% mutate(close = 100*(close - first(close))/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
 ```
 
-You can also find the monthly returns under the same timeline for our stock selections.
-
-```{r}
-stock_returns_monthly %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + geom_line()
-```
+You can also find the monthly returns under the same timeline for our stock selections. The more volatile stock returns can be seen with the graphs displaying more a jagged, spread out appearance.
 
 ```{r}
 stock_returns_monthly %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + 
@@ -93,9 +89,11 @@ spy_returns_monthly_raw <- tq_get("SPY", get = "stock.prices", from = "2004-01-0
 spy_returns_monthly = tq_transmute(spy_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "SPYMonthlyReturns")
 
 ### Transforms data into percentages ###
-# sp500_returns_monthly["Monthly Returns"] = sp500_returns_monthly["Monthly Returns"] * 100
+spy_returns_monthly_percentages = data.frame("date" = spy_returns_monthly$date, "SPYPercentReturns" = spy_returns_monthly$SPYMonthlyReturns * 100)
+
 
 spy_returns_monthly
+spy_returns_monthly_percentages
 ```
 
 **NASDAQ:**
@@ -109,9 +107,10 @@ nasdaq_returns_monthly_raw <- tq_get("QQQ", get = "stock.prices", from = "2004-0
 nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "NASDAQMonthlyReturns")
 
 ### Transforms data into percentages ###
-# nasdaq_returns_monthly["Monthly Returns"] = nasdaq_returns_monthly["Monthly Returns"] * 100
+nasdaq_returns_monthly_percentages = data.frame("date" = nasdaq_returns_monthly$date, "NASDAQPercentReturns" = nasdaq_returns_monthly$NASDAQMonthlyReturns * 100)
 
 nasdaq_returns_monthly
+nasdaq_returns_monthly_percentages
 ```
 
 The following line graph depicts the price trends for both the benchmark returns — SPY (light blue) & QQQ (orange). Once again we standardize the index prices for a better comparison.
@@ -120,7 +119,7 @@ The following line graph depicts the price trends for both the benchmark returns
 # Combining benchmark raw dataframes
 benchmark_returns_raw = rbind(spy_returns_monthly_raw, nasdaq_returns_monthly_raw)
 
-benchmark_returns_raw %>% group_by(symbol) %>% mutate(close = 100*close/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
+benchmark_returns_raw %>% group_by(symbol) %>% mutate(close = 100*(close - first(close))/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
 ```
 
 Next, we aggregate the semiconductor stocks into a single portfolio with a combined rate of return.
@@ -130,19 +129,16 @@ Next, we aggregate the semiconductor stocks into a single portfolio with a combi
 aggregate_portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = `MonthlyReturns`, weights = weights1, col_rename = "AggregateMonthlyReturns")
 
 ### Transforms data into percentages ###
-# portfolio_monthly_returns["AggregateMonthlyReturns"] = portfolio_monthly_returns["AggregateMonthlyReturns"] * 100
+aggregate_returns_monthly_percentages = data.frame("date" = aggregate_portfolio_monthly_returns$date, "AggregatePercentReturns" = aggregate_portfolio_monthly_returns$AggregateMonthlyReturns * 100)
 
 aggregate_portfolio_monthly_returns
+aggregate_returns_monthly_percentages
 ```
 
 The historical aggregate returns for our equally weighted tech portfolio is displayed below along with a trend line to track long term direction.
 
 ```{r}
-aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_bar(stat = "identity", fill = palette_light()[[1]]) + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + geom_smooth(method = "lm") + theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
-```
-
-```{r}
-aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
+aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "20% AMD, 20% INTC,20% NVDA, 20% QCOM, and 20% TSM", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
   geom_smooth(method = "loess") + 
   theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
@@ -161,9 +157,9 @@ aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly %>%
 aggregate_portfolio_monthly_returns_growth %>%
     ggplot(aes(x = date, y = investment.growth)) +
     geom_line(linewidth = 2, color = palette_light()[[1]]) +
-    labs(title = "Portfolio Growth",
-         subtitle = "20% AMD, 20% INTC,20% NVDA, 20% SMCI, and 20% TSM",
-         caption = "Performance growth over our 20-year timeline",
+    labs(title = "Pearl Fund Portfolio Growth",
+         subtitle = "20% AMD, 20% INTC,20% NVDA, 20% QCOM, and 20% TSM",
+         caption = "Performance growth over our 20-year horizon",
          x = "Year", y = "Portfolio Value") +
     geom_smooth(method = "loess") +
     scale_y_continuous(labels = scales::dollar)
@@ -187,17 +183,6 @@ nasdaq_combined_table_of_returns
 # Combined Table (3 Funds)
 three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, nasdaq_returns_monthly, by="date")
 
-# Pearl Fund vs SPY vs NASDAQ
-ggplot(three_fund_combined_table_of_returns, aes(x = date)) +
-  geom_line(aes(y = `AggregateMonthlyReturns`, color = "Aggregate"), linetype = "solid", size = 1) +
-  geom_line(aes(y = `SPYMonthlyReturns`, color = "SPY"), linetype = "solid", size = 1) +
-  geom_line(aes(y = `NASDAQMonthlyReturns`, color = "NASDAQ"), linetype = "solid", size = 1) +
-  labs(title = "Monthly Returns Over Time", x = "Date", y = "Returns") +
-  scale_linetype_manual(values = c("solid", "dashed", "dotted")) +
-  scale_color_manual(values = c("Aggregate" = "blue", "SPY" = "red", "NASDAQ" = "black")) +
-  theme_minimal() +
-  theme(legend.position = "top")
-
 three_fund_combined_table_of_returns
 ```
 
@@ -212,13 +197,16 @@ three_fund_long |>
   facet_grid(symbol ~ .)
 ```
 
-Finally, we compute several important statistical & financial measures for our portfolio relative to the performance of each respective benchmark index we have chosen.
+Finally, we compute several important CAPM statistical & financial measures for our portfolio relative to the performance of each respective benchmark index we have chosen.
 
 ```{r}
-# Pear Fund against SPY
+
+### Useful Measures: table.Stats, table.CAPM, table.AnnualizedReturns, table.Correlation, table.DownsideRisk, table.DownsideRiskRatio, table.HigherMoments, table.InformationRatio, table.Variability, VaR, SharpeRatio ###
+
+# Pear Fund vs. SPY
 statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `SPYMonthlyReturns`, performance_fun = table.CAPM)
 
-# Pearl Fund against NASDAQ
+# Pearl Fund vs. NASDAQ
 statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
 
 statisticsA
@@ -262,21 +250,18 @@ multiple_portfolio_returns_monthly <- multiple_stock_returns_monthly %>%
                  weights     = portfolio_of_weights, 
                  col_rename  = "MultiplePortfolioMonthlyReturns")
 
+multiple_portfolio_returns_monthly$portfolio = as.character(multiple_portfolio_returns_monthly$portfolio)
+
 multiple_portfolio_returns_monthly
 ```
 
 You can visualize the portfolio returns below
 
 ```{r}
-
-ggplot(multiple_portfolio_returns_monthly, aes(x = date, y = MultiplePortfolioMonthlyReturns, color = as.factor(portfolio))) +
+multiple_portfolio_returns_monthly |>
+ggplot(aes(x = date, y = MultiplePortfolioMonthlyReturns, color = portfolio)) +
   geom_line() +
-  labs(title = "Portfolio 1 vs Portfolio 2 Historical Monthly Returns",
-       x = "Date",
-       y = "Monthly Returns",
-       color = "Portfolio") +
-  scale_color_manual(values = c("red", "green"))+
-  theme_minimal()
+  facet_grid(portfolio ~ .)
 ```
 
 Finally to prepare for statistical metrics tests, we join the returns of the S&P 500 index with our portfolio returns — you can see the monthly returns side by side, indexed by each portfolio below.
@@ -290,6 +275,12 @@ combined_benchmark_multiple_portfolio
 ```
 
 Voila! You can find the relevant Capital Asset Pricing Model (CAPM) statistics for each portfolio (performance tested against the SPY benchmark index).
+
+::: {.callout-tip appearance="simple"}
+**Once again we will refer to these useful metrics:**
+
+table.Stats, table.CAPM, table.AnnualizedReturns, table.Correlation, table.DownsideRisk, table.DownsideRiskRatio, table.HigherMoments, table.InformationRatio, table.Variability, VaR, SharpeRatio
+:::
 
 ```{r}
 combined_benchmark_multiple_portfolio %>%
@@ -317,27 +308,53 @@ Stock_Statistics = stock_returns_monthly %>% group_by(symbol)  %>% summarise(His
 Stock_Statistics 
 ```
 
-```{r}
-Excess_Return = Stock_Statistics$Historic_Expected_Returns - (latest_ten_year_treasury_yield/100)
-Excess_Return
-```
+The following are excess returns with respect to the treasury yields (useful later on for the SharpeRatio)
 
 ```{r}
-Stock_Statistics = mutate(Stock_Statistics, Excess_Return = Excess_Return)
+Expected_Treasury_Excess_Return = Stock_Statistics$Historic_Expected_Returns - ((1 + latest_ten_year_treasury_yield/100)^(1/12) - 1)
+
+Expected_Treasury_Excess_Return
+```
+
+We append this to our table of statistics for future use.
+
+```{r}
+Stock_Statistics = mutate(Stock_Statistics, Expected_Treasury_Excess_Return = Expected_Treasury_Excess_Return)
+
 Stock_Statistics
 ```
 
-```{r}
-returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
+Now we calculate a different type of excess returns, where we subtract our expected monhtly return value from each of our historical monthly return values, to get an array of excess returns. This is common practice in a lot of risk-adjusted return portfolio analysis.
 
-excess_monthly_returns_table <- returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
-excess_monthly_returns_table
+```{r}
+excess_returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
+
+excess_returns_table <- returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
+excess_returns_table
 ```
 
+In this step we are calculating two crucial matrices that are relevant for our optimization, the variance-covariance matrix and the correlation matrix. Each value of each matrix follows from the following equations, respectively:
+
+> \*Note that the correlation matrix necessitates an input of the Var-CoVar Matrix
+
+$$
+Var-CoVar: \Sigma = \frac{X^T X}{n-1}
+$$
+
+$$
+Corr: \frac{\Sigma}{\sigma^T \sigma}
+$$
+
 ```{r}
-M = as.matrix(three_fund_combined_table_of_returns[ ,2:4])
-colnames(M) = c("agg", "spy", "qqq")
+excess_returns_wider =  excess_returns_table |> pivot_wider(names_from = symbol, values_from = Excess_Returns)
+
+M = as.matrix(excess_returns_wider[ ,2:6])
+
+# Variance-Covariance Matrix
 var(M)
 
+#Correlation Matrix
 cor(M)
 ```
+
+Now we begin optimization under various different selected constraints which are adjustable depending on one's objectives.
