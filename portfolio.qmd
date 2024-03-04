@@ -329,7 +329,7 @@ Now we calculate a different type of excess returns, where we subtract our expec
 ```{r}
 excess_returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
 
-excess_returns_table <- returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
+excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
 excess_returns_table
 ```
 
@@ -358,3 +358,37 @@ cor(M)
 ```
 
 Now we begin optimization under various different selected constraints which are adjustable depending on one's objectives.
+
+```{r}
+
+```
+
+```{r}
+spy_combined_table_of_returns
+```
+
+```{r}
+statstss = spy_combined_table_of_returns %>% tq_performance(Ra = AggregateMonthlyReturns, Rb = NULL, performance_fun = table.Stats)
+statstss[, c("GeometricMean", "Stdev")] %>% mutate( AnnualizedSD = Stdev * sqrt(12), Annualizedreturn = (1+ GeometricMean)^(12) - 1)
+```
+
+```{r}
+install.packages("DEoptim")
+install.packages("PortfolioAnalytics")
+```
+
+```{r}
+
+assets = setNames(weights1, stock_tickers)
+assets
+```
+
+```{r}
+pspec = portfolio.spec(assets = assets)
+print.default(pspec)
+```
+
+```{r}
+pspec = add.constraint(portfolio=pspec, type="weight_sum", min_sum=1, max_sum=1)
+pspec
+```
