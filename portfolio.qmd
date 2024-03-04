@@ -373,8 +373,11 @@ statstss[, c("GeometricMean", "Stdev")] %>% mutate( AnnualizedSD = Stdev * sqrt(
 ```
 
 ```{r}
-install.packages("DEoptim")
-install.packages("PortfolioAnalytics")
+library(PortfolioAnalytics)
+library(DEoptim)
+library(ROI)
+require(ROI.plugin.glpk)
+require(ROI.plugin.quadprog)
 ```
 
 ```{r}
@@ -385,10 +388,44 @@ assets
 
 ```{r}
 pspec = portfolio.spec(assets = assets)
-print.default(pspec)
+print(pspec)
 ```
 
 ```{r}
+# weight sum constraint ensures that sum of weights add to 1
+
 pspec = add.constraint(portfolio=pspec, type="weight_sum", min_sum=1, max_sum=1)
 pspec
+```
+
+```{r}
+# Objective functions minimizes risk/variance and maximizes for mean
+
+pspec = add.objective(portfolio = pspec, type='risk', name="var", arguments=list(p=0.95))
+pspec = add.objective(portfolio=pspec, type='return', name='mean')
+
+print(pspec)
+```
+
+```{r}
+# Some additonal constraints that are neccessary before we use portfolio.optimize — not sure exactly what they are
+
+pspec <- add.constraint(portfolio=pspec, type="leverage", min_sum=0.99, max_sum=1.01)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.65)
+
+# Monthly stock returns for our time period converted into wide format
+
+stock_returns_monthly_wide = pivot_wider(stock_returns_monthly, names_from=symbol, values_from=MonthlyReturns)
+
+# Main optimizer function which optimizes according to our contraints and objectives
+
+opt_maxret <- optimize.portfolio(R=stock_returns_monthly_wide, portfolio=pspec, optimize_method="ROI", trace=TRUE)
+
+# Result of optimal weights is presented here
+
+print(opt_maxret)
+
+# Interested plot of optimal portfolio std dev and mean with respect to those of the individual stocks as well as a line graph of the weights — need to explore this more
+
+plot(opt_maxret, risk.col="StdDev", return.col="mean", main="Maximum Return Optimization", chart.assets=TRUE, xlim=c(0, 0.18), ylim=c(0,0.04))
 ```
