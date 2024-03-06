@@ -33,7 +33,7 @@ We begin with an equally weighted portfolio of the above stocks, each at 20% equ
 
 ```{r}
 stock_tickers <- c("AMD", "INTC", "NVDA", "QCOM", "TSM")
-weights1 <- rep(0.2, 5)
+weights1 <- weights3
 weights2 = c(0.15, 0.1, 0.4, 0.25, 0.1)
 initial_investment <- 10000
 
@@ -261,7 +261,8 @@ You can visualize the portfolio returns below
 multiple_portfolio_returns_monthly |>
 ggplot(aes(x = date, y = MultiplePortfolioMonthlyReturns, color = portfolio)) +
   geom_line() +
-  facet_grid(portfolio ~ .)
+  facet_grid(portfolio ~ .) + 
+  geom_hline(aes(yintercept = mean(filter(multiple_portfolio_returns_monthly, portfolio == 1)$MultiplePortfolioMonthlyReturns)))
 ```
 
 Finally to prepare for statistical metrics tests, we join the returns of the S&P 500 index with our portfolio returns — you can see the monthly returns side by side, indexed by each portfolio below.
@@ -360,10 +361,6 @@ cor(M)
 Now we begin optimization under various different selected constraints which are adjustable depending on one's objectives.
 
 ```{r}
-
-```
-
-```{r}
 spy_combined_table_of_returns
 ```
 
@@ -395,14 +392,16 @@ print(pspec)
 # weight sum constraint ensures that sum of weights add to 1
 
 pspec = add.constraint(portfolio=pspec, type="weight_sum", min_sum=1, max_sum=1)
+# pspec = add.constraint(portfolio=pspec, type="return", return_target=0.27)
 pspec
 ```
 
 ```{r}
 # Objective functions minimizes risk/variance and maximizes for mean
 
-pspec = add.objective(portfolio = pspec, type='risk', name="var", arguments=list(p=0.95))
+# pspec = add.objective(portfolio = pspec, type='risk', name="var", risk_aversion=7)
 pspec = add.objective(portfolio=pspec, type='return', name='mean')
+
 
 print(pspec)
 ```
@@ -411,7 +410,7 @@ print(pspec)
 # Some additonal constraints that are neccessary before we use portfolio.optimize — not sure exactly what they are
 
 pspec <- add.constraint(portfolio=pspec, type="leverage", min_sum=0.99, max_sum=1.01)
-pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.65)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.95)
 
 # Monthly stock returns for our time period converted into wide format
 
@@ -428,4 +427,28 @@ print(opt_maxret)
 # Interested plot of optimal portfolio std dev and mean with respect to those of the individual stocks as well as a line graph of the weights — need to explore this more
 
 plot(opt_maxret, risk.col="StdDev", return.col="mean", main="Maximum Return Optimization", chart.assets=TRUE, xlim=c(0, 0.18), ylim=c(0,0.04))
+```
+
+```{r}
+optimized_list_of_weights = opt_maxret[1]$weights
+optimized_vector_of_weights = unlist(optimized_list_of_weights)
+optimized_vector_of_weights
+```
+
+```{r}
+weights3 = optimized_vector_of_weights
+weights3
+
+```
+
+```{r}
+# Given monthly return
+monthly_return <- 0.0306
+
+# Convert to annualized return
+annualized_return <- (1 + monthly_return)^12 - 1
+
+# Print the result
+print(annualized_return)
+
 ```
