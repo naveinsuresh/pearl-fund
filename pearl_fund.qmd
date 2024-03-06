@@ -26,6 +26,7 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(tidyquant)
+library(quantmod)
 library(PortfolioAnalytics)
 library(DEoptim)
 library(ROI)
@@ -89,7 +90,10 @@ stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>%
   group_by(symbol) %>% 
   mutate(return = 100 * (close - first(close)) / first(close)) %>% 
   ggplot(aes(date, return, color = symbol)) + 
-  geom_line()
+  geom_line() +
+  labs(title = "Stock Performance Over Time Period",
+       y = "Return (in %)") +
+  theme_minimal()
 stock_returns_monthly_raw1
 ```
 
@@ -214,4 +218,81 @@ benchmark_long |>
 ```{r}
 assets = setNames(weights1, stock_tickers)
 assets
+```
+
+```{r}
+#All of these must be in the same line of code otherwise it keeps replicating 
+
+pearlfund = portfolio.spec(assets = assets)
+print(pearlfund)
+
+
+# weight sum constraint ensures that sum of weights add to 1
+
+pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
+
+# pspec = add.constraint(portfolio=pspec, type="return", return_target=0.27)
+
+# Objective functions minimizes risk/variance and maximizes for mean
+
+# pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
+
+pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
+
+# pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
+
+# Some additonal constraints that are neccessary before we use portfolio.optimize — not sure exactly what they are
+
+pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
+pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.95)
+
+# Monthly stock returns for our time period converted into wide format
+
+stock_returns_monthly_wide = pivot_wider(stock_returns_monthly, names_from=symbol, values_from=MonthlyReturns)
+
+# Main optimizer function which optimizes according to our contraints and objectives
+
+opt_maxret <- optimize.portfolio(R=stock_returns_monthly_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
+
+# Result of optimal weights is presented here
+
+print(opt_maxret)
+
+# Interested plot of optimal portfolio std dev and mean with respect to those of the individual stocks as well as a line graph of the weights — need to explore this more
+
+plot(opt_maxret, risk.col="StdDev", return.col="mean", main="Maximum Return Optimization", chart.assets=TRUE, xlim=c(0, 0.18), ylim=c(0,0.04))
+```
+
+```{r}
+optimized_list_of_weights = opt_maxret[1]$weights
+optimized_vector_of_weights = unlist(optimized_list_of_weights)
+optimized_vector_of_weights
+```
+
+```{r}
+aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly %>%
+    tq_portfolio(assets_col = symbol, 
+                 returns_col= `MonthlyReturns`, 
+                 weights = optimized_vector_of_weights,
+                 col_rename   = "investment.growth",
+                 wealth.index = TRUE) %>%
+    mutate(investment.growth = investment.growth * 10000)
+
+aggregate_portfolio_monthly_returns_growth %>%
+    ggplot(aes(x = date, y = investment.growth)) +
+    geom_line(linewidth = 2, color = palette_light()[[1]]) +
+    labs(title = "Pearl Fund Portfolio Growth",
+         subtitle = "Optimized Portfolio Growth",
+         caption = "Performance growth over our 20-year horizon",
+         x = "Year", y = "Portfolio Value") +
+    geom_smooth(method = "loess") +
+    scale_y_continuous(labels = scales::dollar)
+```
+
+```{r}
+aggregate_portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = `MonthlyReturns`, weights = optimized_vector_of_weights, col_rename = "AggregateMonthlyReturns")
+
+aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "Optimized Portfolio", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
+  geom_smooth(method = "loess") + 
+  theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
