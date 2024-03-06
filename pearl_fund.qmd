@@ -16,7 +16,7 @@ Our objective in this project is to optimize a portfolio of stocks for risk-adju
 4.  *QUALCOMM Inc. (NASDAQ: QCOM)*
 5.  *Taiwan Semiconductor Mfg. Co. Ltd. (NYSE: TSM)*
 
-We make use of various financial models, which we go into depth later on while also leverage the tidyquant package on R as our convenient tool for portfolio optimization. Using historical data, we will test our portfolio’s performance and compare it to the performance of two benchmark index funds — S&P 500 and NASDAQ.
+We make use of various financial models, which we go into depth later on while also leveraging the tidyquant package on R as our convenient tool for portfolio optimization. Using historical data, we will test our portfolio’s performance and compare it to the performance of two benchmark index funds — S&P 500 and NASDAQ.
 
 Be sure to have to following libraries installed and imported before proceeding:
 
@@ -58,15 +58,22 @@ Next, we turn to assembling our aggregation for our tech portfolio using histori
 
 ```{r}
 # Raw Stock Monthly Returns
-stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to   = Sys.Date())
+stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date())
 
 # Transformed Monthly Stock Returns
 stock_returns_monthly_long = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
 stock_returns_monthly_wide = pivot_wider(stock_returns_monthly, names_from=symbol, values_from=MonthlyReturns)
 
-# First 5 recent returns should be displayed
-# head(stock_returns_monthly_wide, 5)
+# Still need to figure out how to sort by date but this code below does the job 
+
+stock_returns_monthly_wide$date = as.Date(stock_returns_monthly_wide$date)
+
+stock_returns_monthly_wide_for_display =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
+
+head(stock_returns_monthly_wide_for_display,5)
+
+#head(arrange(stock_returns_monthly_wide, decreasing = TRUE), 5)
 
 ```
 
@@ -75,6 +82,15 @@ Below is a graph of the monthly closing prices for our tech portfolio stocks fro
 ```{r}
 stock_returns_monthly_raw %>% group_by(symbol) %>% mutate(close = 100*(close - first(close))/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
 
+```
+
+```{r}
+stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>% 
+  group_by(symbol) %>% 
+  mutate(return = 100 * (close - first(close)) / first(close)) %>% 
+  ggplot(aes(date, return, color = symbol)) + 
+  geom_line()
+stock_returns_monthly_raw1
 ```
 
 You can also find the monthly returns under the same timeline for our stock selections. The more volatile stock returns can be seen with the graphs displaying more a jagged, spread out appearance.
@@ -191,6 +207,11 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-| ***Analysis & Commentary on the above metrics...***
+| ***OPTIMIZATION***
 
 ------------------------------------------------------------------------
+
+```{r}
+assets = setNames(weights1, stock_tickers)
+assets
+```
