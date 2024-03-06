@@ -33,7 +33,7 @@ We begin with an equally weighted portfolio of the above stocks, each at 20% equ
 
 ```{r}
 stock_tickers <- c("AMD", "INTC", "NVDA", "QCOM", "TSM")
-weights1 <- weights3
+weights1 <- rep(0.2, 5)
 weights2 = c(0.15, 0.1, 0.4, 0.25, 0.1)
 initial_investment <- 10000
 
