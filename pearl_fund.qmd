@@ -6,84 +6,75 @@ format: html
 editor: visual
 ---
 
-## Overview
+# Overview
 
-Our objective in this project is to optimize a portfolio of stocks for risk-adjusted returns. We will be focusing on a 5-stock portfolio, nicknamed the — [***Pearl Fund***]{.underline}. It consists of the leading semiconductor companies in the market:
+In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises leading semiconductor companies in the market, namely:
 
-1.  *Advanced Micro Device, Inc. (NASDAQ: AMD)*
-2.  *Intel Corp. (NASDAQ: INTC)*
-3.  *NVIDIA Corp. (NASDAQ: NVDA)*
-4.  *QUALCOMM Inc. (NASDAQ: QCOM)*
-5.  *Taiwan Semiconductor Mfg. Co. Ltd. (NYSE: TSM)*
+1.  Advanced Micro Devices, Inc. (NASDAQ: AMD)
+2.  Intel Corp. (NASDAQ: INTC)
+3.  NVIDIA Corp. (NASDAQ: NVDA)
+4.  QUALCOMM Inc. (NASDAQ: QCOM)
+5.  Taiwan Semiconductor Manufacturing Co. Ltd. (NYSE: TSM)
 
-We make use of various financial models, which we go into depth later on while also leveraging the tidyquant package on R as our convenient tool for portfolio optimization. Using historical data, we will test our portfolio’s performance and compare it to the performance of two benchmark index funds — S&P 500 and NASDAQ.
+Our approach involves the utilization of sophisticated financial models, which will be thoroughly explained later in this documentation. Furthermore, we leverage the power of various statistical and financial packages. We use th R programming language as our preferred tool for seamless portfolio optimization. Through a comprehensive analysis of historical data, we aim to evaluate and compare the performance of our portfolio against two benchmark index funds—S&P 500 and NASDAQ.
 
-Be sure to have to following libraries installed and imported before proceeding:
+Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project:
 
 ```{r}
-# Comments for Each Library
-library(tidyverse)
-library(ggplot2)
-library(knitr)
-library(tidyquant)
-library(quantmod)
-library(PortfolioAnalytics)
-library(DEoptim)
-library(ROI)
+library(tidyverse) # Convenient data tables + processing
+library(ggplot2) # Visualization tools
+library(knitr) # Report rendering
+library(tidyquant) # Financial data and statistical metrics
+library(quantmod) # Similar to tidyquant features
+library(PortfolioAnalytics) # Optimization statsitical metrics
+library(DEoptim) # Optimization solver
+library(ROI) # Optimization solver
 require(ROI.plugin.glpk)
 require(ROI.plugin.quadprog)
 ```
 
-Our testing time period will be from January 1, 2004 to January 1, 2024. This allows us to account for a range of economic situations — most notably the global financial crisis of 2008 and the SARS COVID-19 epidemic of 2020.
+## Equity Analysis
 
-We begin with an equally weighted portfolio of the above stocks, each at 20% equity holding. For capital consideration, we will assume we start with \$10,000 (USD). You will also find us retrieving the recent 10-year treasury yields using the tidyquant function.
+Our analysis spans from January 1, 2004, until the latest market day close, providing a comprehensive view of various economic scenarios, including critical events such as the global financial crisis of 2008 and the SARS COVID-19 epidemic in 2020. We use the FRED economic data set to retrieve the most recent 10-year Treasury yields for our statistical testing we will run later.
 
 ```{r}
 stock_tickers <- c("AMD", "INTC", "NVDA", "QCOM", "TSM")
-weights1 <- rep(0.2, 5)
-initial_investment <- 10000
-
-# Initial Portfolio (YAHOO)
-stock_allocations <- weights1 * initial_investment
-portfolio <- data.frame("Equity" = stock_tickers, "Investment ($)" = stock_allocations)
 
 # Treasury Yields (FRED)
 ten_year_treasury_yield_table = arrange(tq_get("DGS10", get = "economic.data"), desc(date))
 latest_ten_year_treasury_yield = slice(ten_year_treasury_yield_table, 1)$price
 
-print(portfolio)
 cat("Latest 10-year Treasury Yield: ",latest_ten_year_treasury_yield,"%")
 ```
 
-Next, we turn to assembling our aggregation for our tech portfolio using historical returns for our specified time ranged mentioned earlier (segmented by monthly returns).
+### **Monthly Returns (Table View)**
+
+We proceed to collect our monthly stock returns using the tidyquant functions. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks.
+
+\# Displays the most recent 5 monthly stock returns
+
+stock_returns_monthly_wide_decreasing = stock_returns_monthly_wide\[order(stock_returns_monthly_wide\$date, decreasing = TRUE), \]
+
+head(stock_returns_monthly_wide_for_display,5)
 
 ```{r}
 # Raw Stock Monthly Returns
 stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date())
 
-# Transformed Monthly Stock Returns
+# Transformed Monthly Stock Returns (long format)
 stock_returns_monthly_long = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
 
-stock_returns_monthly_wide = pivot_wider(stock_returns_monthly, names_from=symbol, values_from=MonthlyReturns)
+# Transformed Monthly Stock Returns (wide format)
+stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=symbol, values_from=MonthlyReturns)
 
-# Still need to figure out how to sort by date but this code below does the job 
-
-stock_returns_monthly_wide$date = as.Date(stock_returns_monthly_wide$date)
-
-stock_returns_monthly_wide_for_display =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
-
+# Displays the most recent 5 monthly stock returns
+stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
 head(stock_returns_monthly_wide_for_display,5)
-
-#head(arrange(stock_returns_monthly_wide, decreasing = TRUE), 5)
-
 ```
 
-Below is a graph of the monthly closing prices for our tech portfolio stocks from Jan. 01, 2004 to Jan 01, 2024. We have standardized the data to allow for proper time series analysis.
+### **Stock Growth & Monthly Returns (Graph View)**
 
-```{r}
-stock_returns_monthly_raw %>% group_by(symbol) %>% mutate(close = 100*(close - first(close))/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
-
-```
+Displayed below is a graphical representation of the total returns (%) for our chosen stocks covering the chosen time period. To facilitate accurate time series analysis, the data has been standardized.
 
 ```{r}
 stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>% 
@@ -92,38 +83,47 @@ stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>%
   ggplot(aes(date, return, color = symbol)) + 
   geom_line() +
   labs(title = "Stock Performance Over Time Period",
-       y = "Return (in %)") +
+       y = "Return (%)") +
   theme_minimal()
 stock_returns_monthly_raw1
 ```
 
-You can also find the monthly returns under the same timeline for our stock selections. The more volatile stock returns can be seen with the graphs displaying more a jagged, spread out appearance.
+Furthermore, within the same temporal framework, we present the monthly returns for our selected stocks. The graphical representation highlights the varying levels of volatility, with more erratic and spread-out patterns evident in stocks characterized by higher volatility.
 
 ```{r}
-stock_returns_monthly %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + 
+stock_returns_monthly_long %>% ggplot(aes(date, `MonthlyReturns`, color=symbol)) + 
   geom_line() +
   facet_wrap(~ symbol)
 ```
 
-These foundational analysis and statistical metrics will now help us as we move on to portfolio optimization. Drawing from the principles of Modern Portfolio Theory (MPT), we aim to optimize for the portfolio of assets which under a mean-variance form analysis, maximizes expected returns for a given level of risk-tolerance (standard deviation). We will be making use of concepts such as the efficient frontier model, efficient set mathematics, etc...
+### Statistical Metrics
+
+We calculate the expected returns (based off historical returns), standard deviations, variance, and total count for each of our assets.
 
 ```{r}
-Stock_Statistics = stock_returns_monthly %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`MonthlyReturns`), Standard_Deviation = sd(`MonthlyReturns`), Variance = VAR(`MonthlyReturns`), Count = n())
+Stock_Statistics = stock_returns_monthly_long %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`MonthlyReturns`), Standard_Deviation = sd(`MonthlyReturns`), Variance = VAR(`MonthlyReturns`), Count = n())
 Stock_Statistics 
 ```
 
-Now we calculate a different type of excess returns, where we subtract our expected monhtly return value from each of our historical monthly return values, to get an array of excess returns. This is common practice in a lot of risk-adjusted return portfolio analysis.
+#### **Calculation of Excess Returns**
+
+Moving forward, our analysis involves the computation of excess returns. This is achieved by subtracting our anticipated monthly return value from each historical monthly return value, resulting in an array of excess returns. This practice is widely adopted in risk-adjusted portfolio analysis to refine the assessment of portfolio performance.
 
 ```{r}
-excess_returns_table <- stock_returns_monthly %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
+excess_returns_table <- stock_returns_monthly_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
 
 excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
-excess_returns_table
+
+# Displays the most recent 5 monthly excess stock returns
+excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
+head(excess_returns_table_decreasing,5)
 ```
 
-In this step we are calculating two crucial matrices that are relevant for our optimization, the variance-covariance matrix and the correlation matrix. Each value of each matrix follows from the following equations, respectively:
+We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
 
-> \*Note that the correlation matrix necessitates an input of the Var-CoVar Matrix
+::: callout-note
+💡 Calculation of the correlation matrix necessitates the input of the variance-covariance matrix
+:::
 
 $$
 Var-CoVar: \Sigma = \frac{X^T X}{n-1}
@@ -139,15 +139,20 @@ excess_returns_wider =  excess_returns_table |> pivot_wider(names_from = symbol,
 M = as.matrix(excess_returns_wider[ ,2:6])
 
 # Variance-Covariance Matrix
+cat("Variance-Covariance Matrix")
+cat("\n")
 var(M)
+cat("\n")
 
 #Correlation Matrix
+cat("Correlation Matrix")
+cat("\n")
 cor(M)
 ```
 
-Once we have our monthly historical stock returns for our time frame, we move to our two benchmark index funds, which we use as a comparison for our portfolio performance, *SPDR S&P 500 ETF Trust (NYSE: SPY) & NASDAQ COMPOSITE (NYSE: QQQ).* We pull the respective historical monthly returns once again for these two benchmarks.
+Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ).
 
-**S&P 500:**
+**S&P 500 (Monthly % Returns):**
 
 ```{r}
 # Raw S&P 500 Monthly Returns
@@ -159,15 +164,15 @@ spy_returns_monthly = tq_transmute(spy_returns_monthly_raw, select = adjusted, m
 ### Transforms data into percentages ###
 spy_returns_monthly_percentages = data.frame("date" = spy_returns_monthly$date, "SPYPercentReturns" = spy_returns_monthly$SPYMonthlyReturns * 100)
 
+# Displays the most recent 5 monthly SPY returns (%)
+spy_returns_monthly_percentages_decreasing =  spy_returns_monthly_percentages[order(spy_returns_monthly_percentages$date, decreasing = TRUE), ]
 
-spy_returns_monthly
-spy_returns_monthly_percentages
+head(spy_returns_monthly_percentages_decreasing[, c("date", "SPYPercentReturns")], 5)
 ```
 
-**NASDAQ:**
+**NASDAQ (Monthly % Returns)::**
 
 ```{r}
-
 # Raw NASDAQ Monthly Returns
 nasdaq_returns_monthly_raw <- tq_get("QQQ", get = "stock.prices", from = "2004-01-01", to = "2024-01-01")
 
@@ -177,11 +182,13 @@ nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjus
 ### Transforms data into percentages ###
 nasdaq_returns_monthly_percentages = data.frame("date" = nasdaq_returns_monthly$date, "NASDAQPercentReturns" = nasdaq_returns_monthly$NASDAQMonthlyReturns * 100)
 
-nasdaq_returns_monthly
-nasdaq_returns_monthly_percentages
+# Displays the most recent 5 monthly NASDAQ returns (%)
+nasdaq_returns_monthly_percentages_decreasing =  nasdaq_returns_monthly_percentages[order(nasdaq_returns_monthly_percentages$date, decreasing = TRUE), ]
+
+head(nasdaq_returns_monthly_percentages_decreasing[, c("date", "NASDAQPercentReturns")], 5)
 ```
 
-The following line graph depicts the price trends for both the benchmark returns — SPY (light blue) & QQQ (orange). Once again we standardize the index prices for a better comparison.
+The line graph below illustrates the price trends over our time period for the benchmark returns — SPY and QQQ. As before, we standardize the index prices to facilitate a more effective comparison.
 
 ```{r}
 # Combining benchmark raw dataframes
@@ -190,15 +197,11 @@ benchmark_returns_raw = rbind(spy_returns_monthly_raw, nasdaq_returns_monthly_ra
 benchmark_returns_raw %>% group_by(symbol) %>% mutate(close = 100*(close - first(close))/first(close)) %>% ggplot(aes(date, close, color=symbol)) + geom_line()
 ```
 
-Now we move on with combining the returns of the the two baseline index funds into a single table. A graph is also displayed to represent the returns of the two benchmarks together in one frame.
+Now, we proceed to consolidate the returns of the two baseline index funds into a unified table. Additionally, a graph is presented to visually depict the combined returns of the two benchmarks within a single frame.
 
 ```{r}
 benchmark_combined_table_of_returns = left_join(spy_returns_monthly, nasdaq_returns_monthly, by="date")
 
-benchmark_combined_table_of_returns
-```
-
-```{r}
 benchmark_long = benchmark_combined_table_of_returns |> 
   pivot_longer(cols = 2:3, values_to = "return", names_to = "symbol") |>
   arrange(symbol)
@@ -211,57 +214,57 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-| ***OPTIMIZATION***
+| ...
 
 ------------------------------------------------------------------------
 
+## Portfolio Optimization
+
+The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
+
+#### Equally Weighted Portfolio Initialization
+
 ```{r}
-assets = setNames(weights1, stock_tickers)
+init_weights = rep(0.2, 5)
+assets = setNames(init_weights, stock_tickers)
 assets
 ```
 
-```{r}
-#All of these must be in the same line of code otherwise it keeps replicating 
+Next, using our optimization libraries we create a portfolio object where we will input our asset, initialized weights, portfolio constraints, and our objectives. Our desired outcome will be a vector of weights which optimizes for our objectives under our desired constraints.
 
+/
+
+```{r}
 pearlfund = portfolio.spec(assets = assets)
 print(pearlfund)
 
-
-# weight sum constraint ensures that sum of weights add to 1
+# CONSTRAINTS
 
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
-
-# pspec = add.constraint(portfolio=pspec, type="return", return_target=0.27)
-
-# Objective functions minimizes risk/variance and maximizes for mean
-
-# pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
-
-pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
-
-# pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
-
-# Some additonal constraints that are neccessary before we use portfolio.optimize — not sure exactly what they are
-
 pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
 pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.95)
+# pspec = add.constraint(portfolio=pspec, type="return", return_target=0.27)
 
-# Monthly stock returns for our time period converted into wide format
+# OBJECTIVES
 
-stock_returns_monthly_wide = pivot_wider(stock_returns_monthly, names_from=symbol, values_from=MonthlyReturns)
+pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
+# pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
+# pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
-# Main optimizer function which optimizes according to our contraints and objectives
+# OPTIMIZE.PORTFOLIO
 
 opt_maxret <- optimize.portfolio(R=stock_returns_monthly_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
 
-# Result of optimal weights is presented here
+# OPTIMAL WEIGHTS
 
 print(opt_maxret)
 
-# Interested plot of optimal portfolio std dev and mean with respect to those of the individual stocks as well as a line graph of the weights — need to explore this more
+# VISUALIZATIONS
 
 plot(opt_maxret, risk.col="StdDev", return.col="mean", main="Maximum Return Optimization", chart.assets=TRUE, xlim=c(0, 0.18), ylim=c(0,0.04))
 ```
+
+The following code extracts the weights from our portfolio object and stores it as a vector of weights.
 
 ```{r}
 optimized_list_of_weights = opt_maxret[1]$weights
@@ -269,16 +272,24 @@ optimized_vector_of_weights = unlist(optimized_list_of_weights)
 optimized_vector_of_weights
 ```
 
+### Optimized Portfolio Visualizations
+
+#### Fund Total Growth Return
+
+The following visual displays how much you would have right now if you had invested \$10,000 at the start of the time period till today.
+
+> \*Please note that this does not account for tax consequences, which could reduce your final capital depending on tax policy and brackets
+
 ```{r}
-aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly %>%
+aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
     tq_portfolio(assets_col = symbol, 
                  returns_col= `MonthlyReturns`, 
                  weights = optimized_vector_of_weights,
                  col_rename   = "investment.growth",
-                 wealth.index = TRUE) %>%
-    mutate(investment.growth = investment.growth * 10000)
+                 wealth.index = TRUE) %>% 
+  mutate(investment.growth = investment.growth * 10000)
 
-aggregate_portfolio_monthly_returns_growth %>%
+aggregate_portfolio_monthly_returns %>%
     ggplot(aes(x = date, y = investment.growth)) +
     geom_line(linewidth = 2, color = palette_light()[[1]]) +
     labs(title = "Pearl Fund Portfolio Growth",
@@ -289,10 +300,92 @@ aggregate_portfolio_monthly_returns_growth %>%
     scale_y_continuous(labels = scales::dollar)
 ```
 
+#### Fund Monthly Returns
+
+The following visual displays a scatter plot of the monthly returns throughout the time period of interest. A trend line (using "loess") is fitted onto the graph to display the variation and direction at different regions of the scatter plot.
+
 ```{r}
-aggregate_portfolio_monthly_returns = stock_returns_monthly %>% tq_portfolio(assets_col = symbol, returns_col = `MonthlyReturns`, weights = optimized_vector_of_weights, col_rename = "AggregateMonthlyReturns")
+aggregate_portfolio_monthly_returns = stock_returns_monthly_long %>% tq_portfolio(assets_col = symbol, returns_col = `MonthlyReturns`, weights = optimized_vector_of_weights, col_rename = "AggregateMonthlyReturns")
 
 aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonthlyReturns`)) + geom_point() + labs(title = "Pearl Fund Portfolio Returns", subtitle = "Optimized Portfolio", caption = "Shows an above-zero trend indicating long-term positive returns", x = "", y = "Monthly Returns") + 
   geom_smooth(method = "loess") + 
   theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
+
+#### Annualized Returns
+
+To get a better appreciation for the fund's return, we proceed to annualize the the monthly returns.
+
+```{r}
+portfolio_monthly_mean = unname(unlist(opt_maxret[2]$objective_measures$mean))
+
+# Convert to annualized % return
+annualized_return <- paste0(100*((1 + portfolio_monthly_mean)^12 - 1), "%")
+names(annualized_return) = "Annualized Return"
+
+cat("Annualized Return:", annualized_return)
+```
+
+## Comparitive Statistical Analysis
+
+To objectively test our portfolio, we will be calculating several financial metrics in relation to both our benchmarks — SPY & QQQ.
+
+Valuable tq_performance tests...
+
+:   table.Stats, table.CAPM, table.AnnualizedReturns, table.Correlation, table.DownsideRisk, table.DownsideRiskRatio, table.HigherMoments, table.InformationRatio, table.Variability, VaR, SharpeRatio
+
+To begin, it is important to combine the benchmark index monthly returns with our portfolio monthly returns.
+
+```{r}
+# Portfolio + S&P500 Table
+spy_combined_table_of_returns = left_join(aggregate_portfolio_monthly_returns, spy_returns_monthly, by="date")
+
+# Portfolio + NASDAQ Table
+nasdaq_combined_table_of_returns = left_join(aggregate_portfolio_monthly_returns, nasdaq_returns_monthly, by="date")
+
+# Displays the most recent 5 monthly returns for the tables above
+spy_combined_table_of_returns_decreasing =  spy_combined_table_of_returns[order(spy_combined_table_of_returns$date, decreasing = TRUE), ]
+head(spy_combined_table_of_returns_decreasing, 5)
+
+nasdaq_combined_table_of_returns_decreasing =  nasdaq_combined_table_of_returns[order(nasdaq_combined_table_of_returns$date, decreasing = TRUE), ]
+head(nasdaq_combined_table_of_returns_decreasing, 5)
+```
+
+The following code combines all the funds of interest that intend to be comparing into a single table (wide format).
+
+```{r}
+# Combined Table (3 Funds)
+three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, nasdaq_returns_monthly, by="date")
+
+three_fund_combined_table_of_returns
+```
+
+This is a great display of a side by side view of the monthly returns for our three funds of comparison for our time period of interest.
+
+```{r}
+three_fund_long = three_fund_combined_table_of_returns |> 
+  pivot_longer(cols = 2:4, values_to = "return", names_to = "symbol") |>
+  arrange(symbol)
+
+three_fund_long |>
+  ggplot(aes(x = date, y = return, color = symbol)) +
+  geom_line() +
+  facet_grid(symbol ~ .)
+```
+
+The tq_performance function in tidyquant allows us to produce statistical metrics for financial analysis for our Peal Fund against each of the benchmark index funds.
+
+```{r}
+# Pear Fund vs. SPY
+statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `SPYMonthlyReturns`, performance_fun = table.CAPM)
+
+# Pearl Fund vs. NASDAQ
+statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
+
+statisticsA
+statisticsB
+```
+
+### Multiple Portfolio Testing 
+
+We can optimize for different constraints and objectives to produce different weights and compare multiple portfolios side by side like above.
