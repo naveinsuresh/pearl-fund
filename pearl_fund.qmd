@@ -26,10 +26,13 @@ library(ggplot2) # Visualization tools
 library(knitr) # Report rendering
 library(tidyquant) # Financial data and statistical metrics
 library(quantmod) # Similar to tidyquant features
+library(PerformanceAnalytics) # Econometric Tools for Performance and Risk Analysis
 library(PortfolioAnalytics) # Optimization statsitical metrics
 library(DEoptim) # Optimization solver
 library(ROI) # Optimization 
 library(tseries) # Time Series Analysis & Computational Finance
+library(TTR) # Technical Trading Rules 
+library(fPortfolio) # Portfolio Selection and Optimization
 require(ROI.plugin.glpk)
 require(ROI.plugin.quadprog)
 ```
@@ -393,6 +396,87 @@ statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `Aggregat
 
 statisticsA
 statisticsB
+```
+
+# Efficient Frontier 
+
+Okay, so I worked on 2 different approaches to the efficient frontier. I'll give more info below
+
+This line of code below is essential as it eliminates the date column and only considers returns.
+
+```{r}
+stock_returns_monthly_wide[, -1]
+```
+
+## Approach 1 
+
+This is the first approach (<https://rforanalytics.com/01-Part_2_portfolio.html>). The code is completely from this site, I just tweaked the variable names. Still not entirely sure what this spits out and how we calculate the optimal portfolio from this
+
+```{r}
+np1 = 200
+ret2 = stock_returns_monthly_wide[, -1]  #excluding dates
+mu1 = colMeans(ret2)  #mean returns
+na1 = ncol(ret2)  #number of assets
+varc1 = cov(ret2)
+
+riskp1 = NULL  #vector to store risk
+retp1 = NULL  #vector to store returns
+# using loops here (not aiming for efficiency but demonstration)
+
+for (i in 1:np1) {
+    w = diff(c(0, sort(runif(na1 - 1)), 1))  # random weights
+    r1 = t(w) %*% mu1  #matrix multiplication
+    sd1 = t(w) %*% varc1 %*% w
+    retp1 = rbind(retp1, r1)
+    riskp1 = rbind(riskp1, sd1)
+}
+
+# create a data frame of risk and return
+d_p1 = data.frame(Ret = retp1, Risk = riskp1)
+# simple plot
+plot(d_p1$Risk, d_p1$Ret, xlab = "Risk", ylab = "Return", main = "Frontier Portfolios",
+    col = "blue")
+```
+
+```{r}
+p1 = ggplot(d_p1, aes(Risk, Ret, colour = Ret))
+# scatter plot
+p1 = p1 + geom_point()
+# scatter plot with density and identified port risk return (highest
+# lowest returns and min risk)
+p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
+    min(d_p1$Ret)), colour = c("darkgreen", "darkgray", "darkred"), size = 1) +
+    geom_vline(xintercept = d_p1[(d_p1$Risk == min(d_p1$Risk)), ][, 2]) +
+    labs(colour = "Portfolio Return", x = "Portfolio Risk", y = "Portfolio Return",
+        title = "Random Feasible Portfolios") + theme_bw()
+```
+
+## Approach 2 
+
+This one seems a little easier. <https://www.youtube.com/watch?v=pchqBhof62U> I am not entirely sure how we give it the optimized weights we calculate.
+
+```{r}
+return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
+return.matrix
+```
+
+```{r}
+efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
+plot(efficient.frontier, c(1,3,4,7))
+
+# Syntax for choosing vector in plot function above ^b
+# 1. Efficient Frontier 
+# 2. Global Minimum Variance Portfolio 
+# 3. Tangent (optimal) portfolio 
+# 4. Risk/Return of each asset 
+# 5. Equal Weights Portfolio
+# 6. Two Asset frontier 
+# 7. Monte Carlo 
+# 8. Sharpe Ratio 
+```
+
+```{r}
+weightsPlot(efficient.frontier)
 ```
 
 ### Multiple Portfolio Testing

@@ -117,3 +117,7 @@ portfolio_df %>%
                 title='Efficient Frontier graph of 5 assets',
                 subtitle='AAPL, MSFT, GOOG, AMZN, JNJ')
 ```
+
+```{r}
+install.packages("fPortfolio")
+```
