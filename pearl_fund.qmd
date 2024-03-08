@@ -28,7 +28,8 @@ library(tidyquant) # Financial data and statistical metrics
 library(quantmod) # Similar to tidyquant features
 library(PortfolioAnalytics) # Optimization statsitical metrics
 library(DEoptim) # Optimization solver
-library(ROI) # Optimization solver
+library(ROI) # Optimization 
+library(tseries) # Time Series Analysis & Computational Finance
 require(ROI.plugin.glpk)
 require(ROI.plugin.quadprog)
 ```
@@ -79,11 +80,11 @@ Displayed below is a graphical representation of the total returns (%) for our c
 ```{r}
 stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>% 
   group_by(symbol) %>% 
-  mutate(return = 100 * (close - first(close)) / first(close)) %>% 
+  mutate(return = 100 * (log(close) - first(log(close)) / first(log(close)))) %>% 
   ggplot(aes(date, return, color = symbol)) + 
   geom_line() +
   labs(title = "Stock Performance Over Time Period",
-       y = "Return (%)") +
+       y = "Return (%) on a log scale") +
   theme_minimal()
 stock_returns_monthly_raw1
 ```
@@ -103,6 +104,14 @@ We calculate the expected returns (based off historical returns), standard devia
 ```{r}
 Stock_Statistics = stock_returns_monthly_long %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`MonthlyReturns`), Standard_Deviation = sd(`MonthlyReturns`), Variance = VAR(`MonthlyReturns`), Count = n())
 Stock_Statistics 
+```
+
+```{r}
+ggplot(Stock_Statistics, aes(x = Standard_Deviation, y = Historic_Expected_Returns, color = symbol)) +
+geom_point(size = 5) +
+# Miscellaneous Formatting
+theme_bw() + ggtitle(" Monthly Historic Risk-Return Tradeoff") +
+xlab("Volatility") + ylab("Expected Returns")
 ```
 
 #### **Calculation of Excess Returns**
@@ -243,13 +252,13 @@ print(pearlfund)
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
 pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
 pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.95)
-# pspec = add.constraint(portfolio=pspec, type="return", return_target=0.27)
+# pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.002)
 
 # OBJECTIVES
 
 pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
 # pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
-# pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
+pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
 
@@ -386,6 +395,6 @@ statisticsA
 statisticsB
 ```
 
-### Multiple Portfolio Testing 
+### Multiple Portfolio Testing
 
 We can optimize for different constraints and objectives to produce different weights and compare multiple portfolios side by side like above.
