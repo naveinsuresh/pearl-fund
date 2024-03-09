@@ -57,10 +57,6 @@ We proceed to collect our monthly stock returns using the tidyquant functions. A
 
 \# Displays the most recent 5 monthly stock returns
 
-stock_returns_monthly_wide_decreasing = stock_returns_monthly_wide\[order(stock_returns_monthly_wide\$date, decreasing = TRUE), \]
-
-head(stock_returns_monthly_wide_for_display,5)
-
 ```{r}
 # Raw Stock Monthly Returns
 stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date())
@@ -73,7 +69,7 @@ stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=
 
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
-head(stock_returns_monthly_wide_for_display,5)
+head(stock_returns_monthly_wide_decreasing, 5)
 ```
 
 ### **Stock Growth & Monthly Returns (Graph View)**
@@ -398,7 +394,7 @@ statisticsA
 statisticsB
 ```
 
-# Efficient Frontier 
+# Efficient Frontier
 
 Okay, so I worked on 2 different approaches to the efficient frontier. I'll give more info below
 
@@ -408,7 +404,7 @@ This line of code below is essential as it eliminates the date column and only c
 stock_returns_monthly_wide[, -1]
 ```
 
-## Approach 1 
+## Approach 1
 
 This is the first approach (<https://rforanalytics.com/01-Part_2_portfolio.html>). The code is completely from this site, I just tweaked the variable names. Still not entirely sure what this spits out and how we calculate the optimal portfolio from this
 
@@ -439,6 +435,10 @@ plot(d_p1$Risk, d_p1$Ret, xlab = "Risk", ylab = "Return", main = "Frontier Portf
 ```
 
 ```{r}
+print(d_p1)
+```
+
+```{r}
 p1 = ggplot(d_p1, aes(Risk, Ret, colour = Ret))
 # scatter plot
 p1 = p1 + geom_point()
@@ -451,7 +451,7 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
         title = "Random Feasible Portfolios") + theme_bw()
 ```
 
-## Approach 2 
+## Approach 2
 
 This one seems a little easier. <https://www.youtube.com/watch?v=pchqBhof62U> I am not entirely sure how we give it the optimized weights we calculate.
 
