@@ -20,7 +20,7 @@ Our approach involves the utilization of sophisticated financial models, which w
 
 Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project:
 
-```{}
+```         
 ```
 
 ```{r}
@@ -36,7 +36,7 @@ library(ROI) # Optimization
 library(tseries) # Time Series Analysis & Computational Finance
 library(TTR) # Technical Trading Rules 
 library(fPortfolio) # Portfolio Selection and Optimization
-library(pander) # An R 'Pandoc' Writer 
+# library(pander) # An R 'Pandoc' Writer 
 require(ROI.plugin.glpk)
 require(ROI.plugin.quadprog)
 ```
@@ -263,12 +263,12 @@ print(pearlfund)
 
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
 pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
-pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.95)
-# pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.002)
+pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.00, max=1.00)
+pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0353)
 
 # OBJECTIVES
 
-pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
+# pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
 #pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
 pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
@@ -448,6 +448,30 @@ plot(d_p1$Risk, d_p1$Ret, xlab = "Risk", ylab = "Return", main = "Frontier Portf
 ```
 
 ```{r}
+# Set confidence level
+confidence_level <- 0.95
+
+# Calculate the index corresponding to the confidence level
+n <- nrow(d_p1)
+tail_index <- floor((1 - confidence_level) * n)
+
+# Sort portfolio returns in descending order
+sorted_returns <- sort(retp1, decreasing = TRUE)
+
+# Extract the tail returns
+tail_returns <- sorted_returns[1:tail_index]
+
+# Calculate Expected Tail Loss (CVaR)
+cvar <- mean(tail_returns)
+
+# Print the result
+cat("Expected Tail Loss (CVaR) at", confidence_level * 100, "% confidence level:", cvar, "\n")
+
+```
+
+```{r}
+# Add ETL to this table
+
 print(d_p1)
 ```
 
@@ -492,6 +516,12 @@ plot(efficient.frontier, c(1,7))
 ```{r}
 weightsPlot(efficient.frontier)
 ```
+
+**How to Read Graph Above:**
+
+-   Pick a vertical line/column at a specified target return and target risk and you can find out the allocations of stocks in your portfolio (through the lengths of the appropriate colored bars) to achieve those metrics.
+
+Pick your desired
 
 ```{r}
 library(PortfolioAnalytics)
