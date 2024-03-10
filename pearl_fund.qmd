@@ -79,7 +79,7 @@ Displayed below is a graphical representation of the total returns (%) for our c
 ```{r}
 stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>% 
   group_by(symbol) %>% 
-  mutate(return = 100 * (log(close) - first(log(close)) / first(log(close)))) %>% 
+  mutate(return = 100 * (log(close) - log(first(close))) / log(first(close))) %>% 
   ggplot(aes(date, return, color = symbol)) + 
   geom_line() +
   labs(title = "Stock Performance Over Time Period",
@@ -125,6 +125,22 @@ excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Exces
 # Displays the most recent 5 monthly excess stock returns
 excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
 head(excess_returns_table_decreasing,5)
+```
+
+This code below was an output of CHATGPT cause it said our code above was incorrect?? Not sure whats different but output is different
+
+```{r}
+excess_returns_table1 <- stock_returns_monthly_long %>%
+  left_join(Stock_Statistics, by = "symbol") %>%
+  mutate(Excess_Returns1 = MonthlyReturns - Historic_Expected_Returns) %>%
+  select(symbol, date, Excess_Returns1)
+
+# Order by date in descending order and display the most recent 5 monthly excess stock returns
+excess_returns_table_decreasing1 <- excess_returns_table1 %>%
+  arrange(desc(date)) %>%
+  head(5)
+
+excess_returns_table_decreasing1
 ```
 
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
