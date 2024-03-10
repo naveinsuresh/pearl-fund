@@ -121,6 +121,8 @@ xlab("Volatility") + ylab("Expected Returns")
 
 Moving forward, our analysis involves the computation of excess returns. This is achieved by subtracting our anticipated monthly return value from each historical monthly return value, resulting in an array of excess returns. This practice is widely adopted in risk-adjusted portfolio analysis to refine the assessment of portfolio performance.
 
+We need to split the data into 2 - 2004 to 2019 and 2019 to 2024. calculate mean return from 04 to 19 and then apply it to 19 to 24 excess return calculation.
+
 ```{r}
 excess_returns_table <- stock_returns_monthly_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
 
@@ -129,22 +131,6 @@ excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Exces
 # Displays the most recent 5 monthly excess stock returns
 excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
 head(excess_returns_table_decreasing,5)
-```
-
-This code below was an output of CHATGPT cause it said our code above was incorrect?? Not sure whats different but output is different
-
-```{r}
-excess_returns_table1 <- stock_returns_monthly_long %>%
-  left_join(Stock_Statistics, by = "symbol") %>%
-  mutate(Excess_Returns1 = MonthlyReturns - Historic_Expected_Returns) %>%
-  select(symbol, date, Excess_Returns1)
-
-# Order by date in descending order and display the most recent 5 monthly excess stock returns
-excess_returns_table_decreasing1 <- excess_returns_table1 %>%
-  arrange(desc(date)) %>%
-  head(5)
-
-excess_returns_table_decreasing1
 ```
 
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
@@ -175,7 +161,14 @@ cat("\n")
 #Correlation Matrix
 cat("Correlation Matrix")
 cat("\n")
-cor(M)
+d = cor(M)
+cat("\n")
+
+#Correlation Matrix with percentage 
+cat("Correlation Matrix as percentages")
+cat("\n")
+cor(M) * 100
+
 ```
 
 Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ).
@@ -276,7 +269,7 @@ pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.95)
 # OBJECTIVES
 
 pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
-# pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
+#pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
 pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
@@ -429,7 +422,7 @@ stock_returns_monthly_wide[, -1]
 This is the first approach (<https://rforanalytics.com/01-Part_2_portfolio.html>). The code is completely from this site, I just tweaked the variable names. Still not entirely sure what this spits out and how we calculate the optimal portfolio from this
 
 ```{r}
-np1 = 200
+np1 = 1000
 ret2 = stock_returns_monthly_wide[, -1]  #excluding dates
 mu1 = colMeans(ret2)  #mean returns
 na1 = ncol(ret2)  #number of assets
@@ -477,12 +470,13 @@ This one seems a little easier. <https://www.youtube.com/watch?v=pchqBhof62U> I 
 
 ```{r}
 return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
-return.matrix
+# return.matrix
+print(dim(return.matrix))
 ```
 
 ```{r}
 efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
-plot(efficient.frontier, c(1,3,4,7))
+plot(efficient.frontier, c(1,7))
 
 # Syntax for choosing vector in plot function above ^b
 # 1. Efficient Frontier 
