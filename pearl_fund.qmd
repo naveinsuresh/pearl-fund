@@ -133,6 +133,23 @@ excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_tab
 head(excess_returns_table_decreasing,5)
 ```
 
+## Splitting data into two 
+
+We need to split the data into 2 - 2004 to 2019 and 2019 to 2024. calculate mean return from 04 to 19 and then apply it to 19 to 24 excess return calculation.
+
+```{r}
+stock_returns_monthly_raw0419 <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date() - 1825)
+
+# Transformed Monthly Stock Returns (long format)
+stock_returns_monthly_long0419 = stock_returns_monthly_raw0419 %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
+stock_returns_monthly_long0419
+
+stock_returns_monthly_raw2024 <- tq_get(stock_tickers, get  = "stock.prices", from = Sys.Date() - 1825, to = Sys.Date())
+stock_returns_monthly_long2024 = stock_returns_monthly_raw2024 %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
+stock_returns_monthly_long2024
+
+```
+
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
 
 ::: callout-note
@@ -470,9 +487,53 @@ cat("Expected Tail Loss (CVaR) at", confidence_level * 100, "% confidence level:
 ```
 
 ```{r}
-# Add ETL to this table
+# Set confidence level
+confidence_level <- 0.95
 
+# Number of iterations
+
+# Initialize vector to store CVaR values
+cvar_values <- numeric(np1)
+
+# Loop for generating CVaR values
+for (i in 1:np1) {
+  # Generate a random sample of portfolio returns
+  random_sample <- sample(retp1, n, replace = TRUE)
+  
+  # Sort the random sample in descending order
+  sorted_returns <- sort(random_sample, decreasing = TRUE)
+  
+  # Calculate the index corresponding to the confidence level
+  tail_index <- floor((1 - confidence_level) * n)
+  
+  # Extract the tail returns
+  tail_returns <- sorted_returns[1:tail_index]
+  
+  # Calculate Expected Tail Loss (CVaR)
+  cvar_values[i] <- mean(tail_returns)
+}
+
+# Print the first few CVaR values
+length(cvar_values)
+```
+
+```{r}
+# Add ETL to this table
+d_p1 = mutate(d_p1, ETL = cvar_values)
 print(d_p1)
+```
+
+```{r}
+p1 = ggplot(d_p1, aes(ETL, Ret, colour = Ret))
+# scatter plot
+p1 = p1 + geom_point()
+# scatter plot with density and identified port risk return (highest
+# lowest returns and min risk)
+p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
+    min(d_p1$Ret)), colour = c("darkgreen", "darkgray", "darkred"), size = 1) +
+    geom_vline(xintercept = d_p1[(d_p1$Risk == min(d_p1$Risk)), ][, 2]) +
+    labs(colour = "Portfolio Return", x = "Expected Tail Loss", y = "Portfolio Return",
+        title = "Random Feasible Portfolios") + theme_bw()
 ```
 
 ```{r}
