@@ -64,7 +64,7 @@ We proceed to collect our monthly stock returns using the tidyquant functions. A
 
 ```{r}
 # Raw Stock Monthly Returns
-stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date())
+stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = "2019-01-01")
 
 # Transformed Monthly Stock Returns (long format)
 stock_returns_monthly_long = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
@@ -75,6 +75,19 @@ stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
 head(stock_returns_monthly_wide_decreasing, 5)
+```
+
+We repeat the above process for the 2nd batch of monthly stock returns (2019 -\> 2024)
+
+```{r}
+stock_returns_monthly_test_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2019-01-01", to = Sys.Date())
+
+stock_returns_monthly_test_long = stock_returns_monthly_test_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns2nd")
+
+stock_returns_monthly_test_wide = pivot_wider(stock_returns_monthly_test_long, names_from=symbol, values_from=MonthlyReturns2nd)
+
+stock_returns_monthly_test_wide_decreasing =  stock_returns_monthly_test_wide[order(stock_returns_monthly_test_wide$date, decreasing = TRUE), ]
+head(stock_returns_monthly_test_wide_decreasing, 5)
 ```
 
 ### **Stock Growth & Monthly Returns (Graph View)**
@@ -116,10 +129,6 @@ geom_point(size = 5) +
 theme_bw() + ggtitle(" Monthly Historic Risk-Return Tradeoff") +
 xlab("Volatility") + ylab("Expected Returns")
 
-abcd
-```
-
-```{r}
 ggplotly(abcd)
 ```
 
@@ -130,30 +139,13 @@ Moving forward, our analysis involves the computation of excess returns. This is
 We need to split the data into 2 - 2004 to 2019 and 2019 to 2024. calculate mean return from 04 to 19 and then apply it to 19 to 24 excess return calculation.
 
 ```{r}
-excess_returns_table <- stock_returns_monthly_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns` - Historic_Expected_Returns)
+excess_returns_table <- stock_returns_monthly_test_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns2nd` - Historic_Expected_Returns)
 
 excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Excess_Returns`)
 
 # Displays the most recent 5 monthly excess stock returns
 excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
 head(excess_returns_table_decreasing,5)
-```
-
-## Splitting data into two
-
-We need to split the data into 2 - 2004 to 2019 and 2019 to 2024. calculate mean return from 04 to 19 and then apply it to 19 to 24 excess return calculation.
-
-```{r}
-stock_returns_monthly_raw0419 <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date() - 1825)
-
-# Transformed Monthly Stock Returns (long format)
-stock_returns_monthly_long0419 = stock_returns_monthly_raw0419 %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
-stock_returns_monthly_long0419
-
-stock_returns_monthly_raw2024 <- tq_get(stock_tickers, get  = "stock.prices", from = Sys.Date() - 1825, to = Sys.Date())
-stock_returns_monthly_long2024 = stock_returns_monthly_raw2024 %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
-stock_returns_monthly_long2024
-
 ```
 
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
@@ -297,7 +289,7 @@ pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
 
-opt_maxret <- optimize.portfolio(R=stock_returns_monthly_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
+opt_maxret <- optimize.portfolio(R=stock_returns_monthly_test_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
 
 # OPTIMAL WEIGHTS
 
@@ -370,7 +362,7 @@ names(annualized_return) = "Annualized Return"
 cat("Annualized Return:", annualized_return)
 ```
 
-## Comparitive Statistical Analysis
+## Comparative Statistical Analysis
 
 To objectively test our portfolio, we will be calculating several financial metrics in relation to both our benchmarks — SPY & QQQ.
 
@@ -525,9 +517,9 @@ cvar_values <- numeric(np1)
 
 # Loop for generating CVaR values
 for (i in 1:np1) {
-  random_sample <- sample(retp1, n, replace = TRUE)
+  random_sample <- sample(retp1, 1000, replace = TRUE)
   sorted_returns <- sort(random_sample, decreasing = TRUE)
-  tail_index <- floor((1 - confidence_level) * n)
+  tail_index <- floor((1 - confidence_level) * 1000)
   tail_returns <- sorted_returns[1:tail_index]
   cvar_values[i] <- mean(tail_returns)
 }
