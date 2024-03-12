@@ -26,6 +26,7 @@ Before proceeding, ensure that the following libraries are installed and importe
 ```{r}
 library(tidyverse) # Convenient data tables + processing
 library(ggplot2) # Visualization tools
+library(plotly)
 library(knitr) # Report rendering
 library(tidyquant) # Financial data and statistical metrics
 library(quantmod) # Similar to tidyquant features
@@ -110,11 +111,16 @@ Stock_Statistics
 ```
 
 ```{r}
-ggplot(Stock_Statistics, aes(x = Standard_Deviation, y = Historic_Expected_Returns, color = symbol)) +
+abcd = ggplot(Stock_Statistics, aes(x = Standard_Deviation, y = Historic_Expected_Returns, color = symbol)) +
 geom_point(size = 5) +
-# Miscellaneous Formatting
 theme_bw() + ggtitle(" Monthly Historic Risk-Return Tradeoff") +
 xlab("Volatility") + ylab("Expected Returns")
+
+abcd
+```
+
+```{r}
+ggplotly(abcd)
 ```
 
 #### **Calculation of Excess Returns**
