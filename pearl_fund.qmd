@@ -20,26 +20,25 @@ Our approach involves the utilization of sophisticated financial models, which w
 
 Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project:
 
-```         
-```
-
 ```{r}
-library(tidyverse) # Convenient data tables + processing
-library(ggplot2) # Visualization tools
-library(plotly)
-library(knitr) # Report rendering
-library(tidyquant) # Financial data and statistical metrics
-library(quantmod) # Similar to tidyquant features
-library(PerformanceAnalytics) # Econometric Tools for Performance and Risk Analysis
-library(PortfolioAnalytics) # Optimization statsitical metrics
-library(DEoptim) # Optimization solver
-library(ROI) # Optimization 
-library(tseries) # Time Series Analysis & Computational Finance
-library(TTR) # Technical Trading Rules 
-library(fPortfolio) # Portfolio Selection and Optimization
-# library(pander) # An R 'Pandoc' Writer 
-require(ROI.plugin.glpk)
-require(ROI.plugin.quadprog)
+suppressWarnings(suppressPackageStartupMessages({
+  library(tidyverse)
+  library(ggplot2)
+  library(plotly)
+  library(knitr)
+  library(tidyquant)
+  library(quantmod)
+  library(PerformanceAnalytics)
+  library(PortfolioAnalytics)
+  library(DEoptim)
+  library(ROI)
+  library(tseries)
+  library(TTR)
+  library(fPortfolio)
+  require(ROI.plugin.glpk)
+  require(ROI.plugin.quadprog)
+}))
+
 ```
 
 ## Equity Analysis
@@ -47,7 +46,7 @@ require(ROI.plugin.quadprog)
 Our analysis spans from January 1, 2004, until the latest market day close, providing a comprehensive view of various economic scenarios, including critical events such as the global financial crisis of 2008 and the SARS COVID-19 epidemic in 2020. We use the FRED economic data set to retrieve the most recent 10-year Treasury yields for our statistical testing we will run later.
 
 ```{r}
-stock_tickers <- c("AMD", "INTC", "NVDA", "QCOM", "TSM")
+stock_tickers <- c("TLT", "MSFT", "AAPL", "COST", "F", "PEP", "JPM", "RTX", "PG", "CVX", "JNJ")
 
 # Treasury Yields (FRED)
 ten_year_treasury_yield_table = arrange(tq_get("DGS10", get = "economic.data"), desc(date))
@@ -60,11 +59,25 @@ cat("Latest 10-year Treasury Yield: ",latest_ten_year_treasury_yield,"%")
 
 We proceed to collect our monthly stock returns using the tidyquant functions. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks.
 
-\# Displays the most recent 5 monthly stock returns
+```{r}
+
+stock_returns_monthly_full_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date())
+
+# Transformed Monthly Stock Returns (long format)
+stock_returns_monthly_full_long = stock_returns_monthly_full_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturnsFull")
+
+# Transformed Monthly Stock Returns (wide format)
+stock_returns_monthly_full_wide = pivot_wider(stock_returns_monthly_full_long, names_from=symbol, values_from=MonthlyReturnsFull)
+
+# Displays the most recent 5 monthly stock returns
+stock_returns_monthly_full_wide_decreasing =  stock_returns_monthly_full_wide[order(stock_returns_monthly_full_wide$date, decreasing = TRUE), ]
+head(stock_returns_monthly_full_wide_decreasing, 5)
+
+```
 
 ```{r}
 # Raw Stock Monthly Returns
-stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = "2019-01-01")
+stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date() - 1815)
 
 # Transformed Monthly Stock Returns (long format)
 stock_returns_monthly_long = stock_returns_monthly_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns")
@@ -80,7 +93,7 @@ head(stock_returns_monthly_wide_decreasing, 5)
 We repeat the above process for the 2nd batch of monthly stock returns (2019 -\> 2024)
 
 ```{r}
-stock_returns_monthly_test_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2019-01-01", to = Sys.Date())
+stock_returns_monthly_test_raw <- tq_get(stock_tickers, get  = "stock.prices", from = Sys.Date() - 1815, to = Sys.Date())
 
 stock_returns_monthly_test_long = stock_returns_monthly_test_raw %>% group_by(symbol) %>% tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "MonthlyReturns2nd")
 
@@ -261,14 +274,12 @@ The groundwork laid by our analysis and statistical metrics sets the stage for t
 #### Equally Weighted Portfolio Initialization
 
 ```{r}
-init_weights = rep(0.2, 5)
+init_weights = rep((1/length(stock_tickers)), length(stock_tickers))
 assets = setNames(init_weights, stock_tickers)
 assets
 ```
 
 Next, using our optimization libraries we create a portfolio object where we will input our asset, initialized weights, portfolio constraints, and our objectives. Our desired outcome will be a vector of weights which optimizes for our objectives under our desired constraints.
-
-/
 
 ```{r}
 pearlfund = portfolio.spec(assets = assets)
@@ -279,17 +290,17 @@ print(pearlfund)
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
 pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
 pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.00, max=1.00)
-pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0353)
+pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0153)
 
 # OBJECTIVES
 
-# pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
+#pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
 #pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
 pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
 
-opt_maxret <- optimize.portfolio(R=stock_returns_monthly_test_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
+opt_maxret <- optimize.portfolio(R=stock_returns_monthly_full_wide, portfolio=pearlfund, optimize_method="ROI", trace=TRUE)
 
 # OPTIMAL WEIGHTS
 
@@ -554,34 +565,36 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
 
 ------------------------------------------------------------------------
 
-Pick your desired (TESTING)
-
-```{r}
-library(PortfolioAnalytics)
-# initialise with asset names uses time series data
-data_p2 = zoo(ret1[, -1], order.by = as.Date(ret1$Date))
-# create specification
-port = portfolio.spec(assets = c(colnames(data_p2)))
-# add long only constraint
-port = add.constraint(portfolio = port, type = "long_only")
-# add full investment contraint
-port = add.constraint(portfolio = port, type = "full_investment")
-
-# objective: manimise risk
-port_rnd = add.objective(portfolio = port, type = "risk", name = "StdDev")
-
-# objective: maximise return
-port_rnd = add.objective(portfolio = port_rnd, type = "return", name = "mean")
-
-# 1. optimise random portfolios
-
-rand_p = optimize.portfolio(R = data_p2, portfolio = port_rnd, optimize_method = "random",
-    trace = TRUE, search_size = 1000)
-# plot
-
-chart.RiskReward(rand_p, risk.col = "StdDev", return.col = "mean", chart.assets = TRUE)  #also plots the equally weighted portfolio
-```
-
-### Multiple Portfolio Testing
+## Testing (Multiple Portfolios)
 
 We can optimize for different constraints and objectives to produce different weights and compare multiple portfolios side by side like above.
+
+[Industries to Focus On:]{.underline}
+
+-   **Microsoft (MSFT)**
+
+-   **Costco (**
+
+-   Intel
+
+-   Tesla
+
+-   **Ford**
+
+-   Chevron
+
+-   Bank of America
+
+-   Apple
+
+-   **Pepsi**
+
+-   JP Morgan
+
+-   **Capital One**
+
+-   **Proctor & Gamble**
+
+-   **Raytheon**
+
+-   **10-year treasury bond (TLT)**
