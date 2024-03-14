@@ -110,13 +110,25 @@ Displayed below is a graphical representation of the total returns (%) for our c
 ```{r}
 stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>% 
   group_by(symbol) %>% 
-  mutate(return = 100 * (log(close) - log(first(close))) / log(first(close))) %>% 
+  mutate(return = 100 * (close - first(close)) / first(close)) %>% 
   ggplot(aes(date, return, color = symbol)) + 
   geom_line() +
   labs(title = "Stock Performance Over Time Period",
        y = "Return (%) on a log scale") +
   theme_minimal()
 stock_returns_monthly_raw1
+```
+
+```{r}
+stock_returns_monthly_raw %>% 
+  group_by(symbol) %>% 
+  mutate(return = 100 * (close - first(close)) / first(close)) %>% 
+  ggplot(aes(date, return, color = symbol)) + 
+  geom_line() +
+  labs(title = "Stock Performance Over Time Period",
+       y = "Return (%) on a log scale") +
+  theme_minimal() +
+  facet_wrap(~symbol, scales = "free_y")
 ```
 
 Furthermore, within the same temporal framework, we present the monthly returns for our selected stocks. The graphical representation highlights the varying levels of volatility, with more erratic and spread-out patterns evident in stocks characterized by higher volatility.
@@ -158,7 +170,7 @@ excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Exces
 
 # Displays the most recent 5 monthly excess stock returns
 excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
-head(excess_returns_table_decreasing,5)
+head(excess_returns_table_decreasing,20)
 ```
 
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
@@ -178,12 +190,12 @@ $$
 ```{r}
 excess_returns_wider =  excess_returns_table |> pivot_wider(names_from = symbol, values_from = Excess_Returns)
 
-M = as.matrix(excess_returns_wider[ ,2:6])
+M = as.matrix(excess_returns_wider[ ,2:12])
 
 # Variance-Covariance Matrix
 cat("Variance-Covariance Matrix")
 cat("\n")
-var(M)
+round(var(M), 4)
 cat("\n")
 
 #Correlation Matrix
@@ -195,8 +207,33 @@ cat("\n")
 #Correlation Matrix with percentage 
 cat("Correlation Matrix as percentages")
 cat("\n")
-cor(M) * 100
+round(cor(M) * 100, 3)
 
+```
+
+```{r}
+heatmap(d)
+```
+
+```{r}
+# PCA on correlation matrix
+pca = princomp(d, cor = TRUE)
+biplot(pca, choices = c(1,5))
+```
+
+\*correlogram, heatmaps for correlations
+
+```{r}
+# another plot
+pca_df = as.data.frame(cor(d, pca$scores))
+pca_df |>
+  ggplot(aes(x = Comp.1, y = Comp.2)) +
+  geom_point(alpha = 0.3) +
+  geom_text(label = rownames(pca_df)) + 
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(limits = c(-1,1)) +
+  scale_y_continuous(limits = c(-1,1))
 ```
 
 Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ).
