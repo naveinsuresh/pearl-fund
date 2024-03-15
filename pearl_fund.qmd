@@ -8,13 +8,19 @@ editor: visual
 
 # Overview
 
-In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises leading semiconductor companies in the market, namely:
+In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises stocks & etfs from a diverse array of industries and asset classes, namely:
 
-1.  Advanced Micro Devices, Inc. (NASDAQ: AMD)
-2.  Intel Corp. (NASDAQ: INTC)
-3.  NVIDIA Corp. (NASDAQ: NVDA)
-4.  QUALCOMM Inc. (NASDAQ: QCOM)
-5.  Taiwan Semiconductor Manufacturing Co. Ltd. (NYSE: TSM)
+1.  Chevron Corporation (NYSE: CVX)
+2.  Costco Wholesale Corporation (NASDAQ: COST)
+3.  Ford Motor Company (NYSE: F)
+4.  HP Inc. (NYSE: HPQ)
+5.  Johnson & Johnson (NYSE: JNJ)
+6.  JPMorgan Chase & Co. (NYSE: JPM)
+7.  Microsoft Corporation (NASDAQ: MSFT)
+8.  PepsiCo, Inc. (NASDAQ: PEP)
+9.  Procter & Gamble Company (NYSE: PG)
+10. Raytheon Technologies Corporation (NYSE: RTX)
+11. iShares 20+ Year Treasury Bond ETF (NASDAQ: TLT)
 
 Our approach involves the utilization of sophisticated financial models, which will be thoroughly explained later in this documentation. Furthermore, we leverage the power of various statistical and financial packages. We use th R programming language as our preferred tool for seamless portfolio optimization. Through a comprehensive analysis of historical data, we aim to evaluate and compare the performance of our portfolio against two benchmark index funds—S&P 500 and NASDAQ.
 
@@ -46,7 +52,7 @@ suppressWarnings(suppressPackageStartupMessages({
 Our analysis spans from January 1, 2004, until the latest market day close, providing a comprehensive view of various economic scenarios, including critical events such as the global financial crisis of 2008 and the SARS COVID-19 epidemic in 2020. We use the FRED economic data set to retrieve the most recent 10-year Treasury yields for our statistical testing we will run later.
 
 ```{r}
-stock_tickers <- c("TLT", "MSFT", "AAPL", "COST", "F", "PEP", "JPM", "RTX", "PG", "CVX", "JNJ")
+stock_tickers <- c("TLT", "MSFT", "HPQ", "COST", "F", "PEP", "JPM", "RTX", "PG", "CVX", "JNJ")
 
 # Treasury Yields (FRED)
 ten_year_treasury_yield_table = arrange(tq_get("DGS10", get = "economic.data"), desc(date))
@@ -57,7 +63,7 @@ cat("Latest 10-year Treasury Yield: ",latest_ten_year_treasury_yield,"%")
 
 ### **Monthly Returns (Table View)**
 
-We proceed to collect our monthly stock returns using the tidyquant functions. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks.
+We proceed to collect our monthly stock returns using the tidyquant functions. We split this dataset into two sets, one set ranging from 2004 to 5 years prior to th ecurrent date and another one from the previous 5 years. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks for the entire timeline below.
 
 ```{r}
 
@@ -75,6 +81,8 @@ head(stock_returns_monthly_full_wide_decreasing, 5)
 
 ```
 
+This data set shows the last 5 monthly returns from 2004 to 5 years prior to today's date.
+
 ```{r}
 # Raw Stock Monthly Returns
 stock_returns_monthly_raw <- tq_get(stock_tickers, get  = "stock.prices", from = "2004-01-01", to = Sys.Date() - 1815)
@@ -90,7 +98,7 @@ stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_
 head(stock_returns_monthly_wide_decreasing, 5)
 ```
 
-We repeat the above process for the 2nd batch of monthly stock returns (2019 -\> 2024)
+We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 year.
 
 ```{r}
 stock_returns_monthly_test_raw <- tq_get(stock_tickers, get  = "stock.prices", from = Sys.Date() - 1815, to = Sys.Date())
@@ -118,6 +126,8 @@ stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>%
   theme_minimal()
 stock_returns_monthly_raw1
 ```
+
+The individual graphs below show the total return (to date) for each asset on their own scales.
 
 ```{r}
 stock_returns_monthly_raw %>% 
@@ -161,7 +171,7 @@ ggplotly(abcd)
 
 Moving forward, our analysis involves the computation of excess returns. This is achieved by subtracting our anticipated monthly return value from each historical monthly return value, resulting in an array of excess returns. This practice is widely adopted in risk-adjusted portfolio analysis to refine the assessment of portfolio performance.
 
-We need to split the data into 2 - 2004 to 2019 and 2019 to 2024. calculate mean return from 04 to 19 and then apply it to 19 to 24 excess return calculation.
+Using our split data set, we caluclate the historical expected mean from the first group and our excess returns using the monthly returns from the last 5 years with respect to the calculated expected returns to ensure the excess returns don't contain future data priced in.
 
 ```{r}
 excess_returns_table <- stock_returns_monthly_test_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns2nd` - Historic_Expected_Returns)
@@ -198,34 +208,19 @@ cat("\n")
 round(var(M), 4)
 cat("\n")
 
-#Correlation Matrix
-cat("Correlation Matrix")
-cat("\n")
-d = cor(M)
-cat("\n")
+cor_mat = cor(M)
 
 #Correlation Matrix with percentage 
 cat("Correlation Matrix as percentages")
 cat("\n")
-round(cor(M) * 100, 3)
+round(cor_mat * 100, 3)
 
 ```
 
-```{r}
-heatmap(d)
-```
+We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund.
 
 ```{r}
-# PCA on correlation matrix
-pca = princomp(d, cor = TRUE)
-biplot(pca, choices = c(1,5))
-```
 
-\*correlogram, heatmaps for correlations
-
-```{r}
-# another plot
-pca_df = as.data.frame(cor(d, pca$scores))
 pca_df |>
   ggplot(aes(x = Comp.1, y = Comp.2)) +
   geom_point(alpha = 0.3) +
@@ -233,7 +228,27 @@ pca_df |>
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   scale_x_continuous(limits = c(-1,1)) +
-  scale_y_continuous(limits = c(-1,1))
+  scale_y_continuous(limits = c(-1,1)) +
+
+  # Adding arrows from origin to points
+  geom_segment(aes(x = 0, y = 0, 
+                   xend = Comp.1, yend = Comp.2),
+               arrow = arrow(length = unit(0.05, "inches")),
+               color = "blue", 
+               data = subset(pca_df, rownames(pca_df) %in% c("TLT", "MSFT", "HPQ", "COST", "F", "PEP", "JPM", "RTX", "PG", "CVX", "JNJ")),  # Add ticker symbols here
+               size = 0.5, 
+               lineend = "round")
+
+```
+
+The following visuals will help aid the user with further understanding the correlations between the certain assets and larger groupings. Below we include a correlogram & a heat-map.
+
+```{r}
+corrplot(cor_mat, method = "circle")
+```
+
+```{r}
+heatmap(cor_mat)
 ```
 
 Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ).
@@ -300,7 +315,7 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-| ...
+| Summary, Commentary, & Analysis
 
 ------------------------------------------------------------------------
 
@@ -326,12 +341,12 @@ print(pearlfund)
 
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
 pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
-pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.00, max=1.00)
-pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0153)
+pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.80)
+# pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0150)
 
 # OBJECTIVES
 
-#pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
+pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
 #pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
 pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
@@ -602,36 +617,8 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
 
 ------------------------------------------------------------------------
 
-## Testing (Multiple Portfolios)
+| Summary, Commentary, & Analysis
 
-We can optimize for different constraints and objectives to produce different weights and compare multiple portfolios side by side like above.
+------------------------------------------------------------------------
 
-[Industries to Focus On:]{.underline}
-
--   **Microsoft (MSFT)**
-
--   **Costco (**
-
--   Intel
-
--   Tesla
-
--   **Ford**
-
--   Chevron
-
--   Bank of America
-
--   Apple
-
--   **Pepsi**
-
--   JP Morgan
-
--   **Capital One**
-
--   **Proctor & Gamble**
-
--   **Raytheon**
-
--   **10-year treasury bond (TLT)**
+## Multiple Portfolio Performance Testing
