@@ -2,19 +2,10 @@
 title: "Pearl Fund: A Guide on Portfolio Anlaysis & Optmization"
 author: "Navein Suresh & Suryaveer Singh"
 date: Sys.Date()
-format: html
 editor: visual
 toc: True
 highlight-style: pygments
-format: 
-  html: 
-    code-fold: true
-    html-math-method: katex
-  pdf: 
-    geometry: 
-      - top=30mm
-      - left=20mm
-  docx: default
+format: html
 ---
 
 # Overview
@@ -44,6 +35,7 @@ suppressWarnings(suppressPackageStartupMessages({
   library(plotly)
   library(knitr)
   library(tidyquant)
+  library(corrplot)
   library(quantmod)
   library(PerformanceAnalytics)
   library(PortfolioAnalytics)
@@ -231,6 +223,8 @@ round(cor_mat * 100, 3)
 We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund.
 
 ```{r}
+pca = princomp(cor_mat, cor = TRUE)
+pca_df = as.data.frame(cor(cor_mat, pca$scores))
 
 pca_df |>
   ggplot(aes(x = Comp.1, y = Comp.2)) +
@@ -332,7 +326,7 @@ benchmark_long |>
 
 ## Portfolio Optimization
 
-The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
+The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. We will also be utilizing other contraints and objectives to customize what we aim with our financial returns. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
 
 #### Equally Weighted Portfolio Initialization
 
@@ -343,6 +337,18 @@ assets
 ```
 
 Next, using our optimization libraries we create a portfolio object where we will input our asset, initialized weights, portfolio constraints, and our objectives. Our desired outcome will be a vector of weights which optimizes for our objectives under our desired constraints.
+
+*Comments on Constraints*
+
+1.  Weight Sum -\> sets a range of values for the total weight of out portfolio assets
+2.  Leverage -\> sets a range of values to depict additional borrowing
+3.  Box -\> sets a range of values for which the assets can be weighted at
+4.  Return -\> sets a target return rate for our portfolio to achieve
+
+*Comments on Objectives*
+
+1.  Return -\> aims to create a portfolio to maximize the return
+2.  Risk -\> aims to create a portfolio which minimizes the risk (StdDev, var, etc..)
 
 ```{r}
 pearlfund = portfolio.spec(assets = assets)
@@ -374,6 +380,8 @@ print(opt_maxret)
 plot(opt_maxret, risk.col="StdDev", return.col="mean", main="Maximum Return Optimization", chart.assets=TRUE, xlim=c(0, 0.18), ylim=c(0,0.04))
 ```
 
+Our visual above displays a line graph of the associated weights of our assets and a scatter plot comparing the mean vs. StdDev of the individual portfolio compared to the mean vs. StdDev of the portfolio as an aggregate whole.
+
 The following code extracts the weights from our portfolio object and stores it as a vector of weights.
 
 ```{r}
@@ -386,7 +394,7 @@ optimized_vector_of_weights
 
 #### Fund Total Growth Return
 
-The following visual displays how much you would have right now if you had invested \$10,000 at the start of the time period till today.
+The visual below displays how much you would have right now if you had invested \$10,000 at the start of the time period till today.
 
 > \*Please note that this does not account for tax consequences, which could reduce your final capital depending on tax policy and brackets
 
@@ -442,7 +450,7 @@ To objectively test our portfolio, we will be calculating several financial metr
 
 Valuable tq_performance tests...
 
-:   table.Stats, table.CAPM, table.AnnualizedReturns, table.Correlation, table.DownsideRisk, table.DownsideRiskRatio, table.HigherMoments, table.InformationRatio, table.Variability, VaR, SharpeRatio
+:   *table.Stats, table.CAPM, table.AnnualizedReturns, table.Correlation, table.DownsideRisk, table.DownsideRiskRatio, table.HigherMoments, table.InformationRatio, table.Variability, VaR, SharpeRatio*
 
 To begin, it is important to combine the benchmark index monthly returns with our portfolio monthly returns.
 
@@ -548,7 +556,18 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
 
 ```
 
-Here is another display of our efficient frontier using a different R frontier calculation package:
+Here is another display of our plot using a different R frontier calculation package. To choose what you'd like to plot exactly in plot(), enter values from below as a vector:
+
+> *Syntax for choosing vector in plot function above:*
+>
+> 1.  Efficient Frontier
+> 2.  Global Minimum Variance Portfolio
+> 3.  Tangent (optimal portfolio)
+> 4.  Risk/Return of each asset
+> 5.  Equal Weights Portfolio
+> 6.  Two Asset Frontier
+> 7.  Monte Carlo
+> 8.  Sharpe Ratio
 
 ```{r}
 
@@ -557,26 +576,20 @@ return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
 efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
 plot(efficient.frontier, c(1, 5))
 
-# Syntax for choosing vector in plot function above ^b
-# 1. Efficient Frontier 
-# 2. Global Minimum Variance Portfolio 
-# 3. Tangent (optimal) portfolio 
-# 4. Risk/Return of each asset 
-# 5. Equal Weights Portfolio
-# 6. Two Asset frontier 
-# 7. Monte Carlo 
-# 8. Sharpe Ratio 
+
 ```
 
 The following visual is another very useful metric to understand portfolio weightings based on chosen return/risk levels.
 
+> **Interpretation**
+>
 > *Pick a vertical line/column at a specified target return and target risk and you can find out the allocations of stocks in your portfolio (through the lengths of the appropriate colored bars) to achieve those chosen metrics.*
 
 ```{r}
 weightsPlot(efficient.frontier)
 ```
 
-'Here our goal is to produce a different type of frontier visual. Instead of plotting the traditional measures of risk (standard deviation or variance) against returns, we turn to a different measure of risk — *expected tail loss (ETL).* ETL is a another measure of risk which could be a better use in portfolio optimization in certain situations.
+Here our goal is to produce a different type of frontier visual. Instead of plotting the traditional measures of risk (standard deviation or variance) against returns, we turn to a different measure of risk — *expected tail loss (ETL).* ETL is a another measure of risk which could be a better use in portfolio optimization in certain situations.
 
 > ETL, also known as conditional value at risk (CVaR), is a risk measure that quantifies the expected loss in the tail of a distribution of possible outcomes beyond a certain confidence level. ETL focuses specifically on the extreme or tail events, giving an indication of the potential loss in those extreme scenarios. The preference for ETL over variance in some cases arises because ETL puts more emphasis on extreme events, which can be crucial in risk assessment. Variance might not adequately capture the potential impact of rare but severe events, whereas ETL provides a clearer picture of the expected loss in the tail of the distribution.
 
