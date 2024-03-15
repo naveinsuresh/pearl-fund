@@ -1,9 +1,20 @@
 ---
-title: "Pearl Fund"
-author: "Navein Suresh, Suryaveer Singh"
+title: "Pearl Fund: A Guide on Portfolio Anlaysis & Optmization"
+author: "Navein Suresh & Suryaveer Singh"
 date: Sys.Date()
 format: html
 editor: visual
+toc: True
+highlight-style: pygments
+format: 
+  html: 
+    code-fold: true
+    html-math-method: katex
+  pdf: 
+    geometry: 
+      - top=30mm
+      - left=20mm
+  docx: default
 ---
 
 # Overview
