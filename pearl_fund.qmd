@@ -10,7 +10,7 @@ format: html
 
 # Overview
 
-In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises stocks & etfs from a diverse array of industries and asset classes, namely:
+In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises Stocks & ETFs from a diverse array of industries and asset classes, namely:
 
 1.  Chevron Corporation (NYSE: CVX)
 2.  Costco Wholesale Corporation (NASDAQ: COST)
@@ -174,7 +174,7 @@ ggplotly(abcd)
 
 Moving forward, our analysis involves the computation of excess returns. This is achieved by subtracting our anticipated monthly return value from each historical monthly return value, resulting in an array of excess returns. This practice is widely adopted in risk-adjusted portfolio analysis to refine the assessment of portfolio performance.
 
-Using our split data set, we caluclate the historical expected mean from the first group and our excess returns using the monthly returns from the last 5 years with respect to the calculated expected returns to ensure the excess returns don't contain future data priced in.
+Using our split data set, we calculate the historical expected mean from the first group and our excess returns using the monthly returns from the last 5 years with respect to the calculated expected returns to ensure the excess returns don't contain future data priced in.
 
 ```{r}
 excess_returns_table <- stock_returns_monthly_test_long %>% left_join(Stock_Statistics, by = "symbol") %>% mutate(Excess_Returns = `MonthlyReturns2nd` - Historic_Expected_Returns)
@@ -183,7 +183,7 @@ excess_returns_table <- excess_returns_table %>% select(`symbol`, `date`, `Exces
 
 # Displays the most recent 5 monthly excess stock returns
 excess_returns_table_decreasing =  excess_returns_table[order(excess_returns_table$date, decreasing = TRUE), ]
-head(excess_returns_table_decreasing,20)
+head(excess_returns_table_decreasing,length(stock_tickers))
 ```
 
 We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:
@@ -256,7 +256,7 @@ corrplot(cor_mat, method = "circle")
 heatmap(cor_mat)
 ```
 
-Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ).
+Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ). We display the 5 most recent SPY & NASDAQ Monthly returns available.
 
 **S&P 500 (Monthly % Returns):**
 
@@ -276,7 +276,7 @@ spy_returns_monthly_percentages_decreasing =  spy_returns_monthly_percentages[or
 head(spy_returns_monthly_percentages_decreasing[, c("date", "SPYPercentReturns")], 5)
 ```
 
-**NASDAQ (Monthly % Returns)::**
+**NASDAQ (Monthly % Returns):**
 
 ```{r}
 # Raw NASDAQ Monthly Returns
@@ -320,13 +320,13 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-| Summary, Commentary, & Analysis
+| Summary, Commentary, & Analysis...
 
 ------------------------------------------------------------------------
 
 ## Portfolio Optimization
 
-The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. We will also be utilizing other contraints and objectives to customize what we aim with our financial returns. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
+The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. We will also be utilizing other constraints and objectives to customize what we aim with our financial returns. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
 
 #### Equally Weighted Portfolio Initialization
 
@@ -399,6 +399,10 @@ The visual below displays how much you would have right now if you had invested 
 > \*Please note that this does not account for tax consequences, which could reduce your final capital depending on tax policy and brackets
 
 ```{r}
+### Data Retstructuring
+
+# Pearl Fund
+
 aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
     tq_portfolio(assets_col = symbol, 
                  returns_col= `MonthlyReturns`, 
@@ -407,15 +411,63 @@ aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
                  wealth.index = TRUE) %>% 
   mutate(investment.growth = investment.growth * 10000)
 
-aggregate_portfolio_monthly_returns %>%
-    ggplot(aes(x = date, y = investment.growth)) +
-    geom_line(linewidth = 2, color = palette_light()[[1]]) +
-    labs(title = "Pearl Fund Portfolio Growth",
-         subtitle = "Optimized Portfolio Growth",
-         caption = "Performance growth over our 20-year horizon",
-         x = "Year", y = "Portfolio Value") +
-    geom_smooth(method = "loess") +
-    scale_y_continuous(labels = scales::dollar)
+# SPY Portfolio
+
+vals1 <- rep("SPY", 240)
+spy_returns_monthly_ticker = spy_returns_monthly
+spy_returns_monthly_ticker$symbol <- vals1
+
+spy_returns_monthly_ticker_growth <- spy_returns_monthly_ticker %>%
+    tq_portfolio(assets_col = symbol, 
+                 returns_col= `SPYMonthlyReturns`, 
+                 weights = c(1),
+                 col_rename   = "investment.growth",
+                 wealth.index = TRUE) %>% 
+  mutate(investment.growth = investment.growth * 10000)
+
+# NASDAQ Portfolio
+
+vals2 = rep("NASDAQ", 240)
+nasdaq_returns_monthly_ticker = nasdaq_returns_monthly
+nasdaq_returns_monthly_ticker$symbol <- vals2
+
+nasdaq_returns_monthly_ticker_growth <- nasdaq_returns_monthly_ticker %>%
+    tq_portfolio(assets_col = symbol, 
+                 returns_col= `NASDAQMonthlyReturns`, 
+                 weights = c(1),
+                 col_rename   = "investment.growth",
+                 wealth.index = TRUE) %>% 
+  mutate(investment.growth = investment.growth * 10000)
+
+# Pearl Fund Portfolio Growth
+ggplot(aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth)) +
+  geom_line(linewidth = 2, color = "red") +
+  geom_smooth(method = "loess") +
+  labs(title = "Pearl Fund Portfolio Growth",
+       subtitle = "Optimized Portfolio Growth",
+       caption = "Performance growth over our 20-year horizon",
+       x = "Year", y = "Portfolio Value") +
+  scale_y_continuous(labels = scales::dollar)
+
+# SPY Portfolio Growth
+ggplot(spy_returns_monthly_ticker_growth, aes(x = date, y = investment.growth)) +
+  geom_line(linewidth = 2, color = "blue") +
+  geom_smooth(method = "loess") +
+  labs(title = "SPY Portfolio Growth",
+       subtitle = "Optimized Portfolio Growth",
+       caption = "Performance growth over our 20-year horizon",
+       x = "Year", y = "Portfolio Value") +
+  scale_y_continuous(labels = scales::dollar)
+
+# NASDAQ Portfolio Growth
+ggplot(nasdaq_returns_monthly_ticker_growth, aes(x = date, y = investment.growth)) +
+  geom_line(linewidth = 2, color = "green") +
+  geom_smooth(method = "loess") +
+  labs(title = "NASDAQ Portfolio Growth",
+       subtitle = "Optimized Portfolio Growth",
+       caption = "Performance growth over our 20-year horizon",
+       x = "Year", y = "Portfolio Value") +
+  scale_y_continuous(labels = scales::dollar)
 ```
 
 #### Fund Monthly Returns
@@ -469,13 +521,15 @@ nasdaq_combined_table_of_returns_decreasing =  nasdaq_combined_table_of_returns[
 head(nasdaq_combined_table_of_returns_decreasing, 5)
 ```
 
-The following code combines all the funds of interest that intend to be comparing into a single table (wide format).
+The following code combines all the funds of interest that intend to be comparing into a single table (wide format) once again with the 5 most recent returns displayed.
 
 ```{r}
 # Combined Table (3 Funds)
 three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, nasdaq_returns_monthly, by="date")
 
-three_fund_combined_table_of_returns
+three_fund_combined_table_of_returns_decreasing <- arrange(three_fund_combined_table_of_returns, desc(date))
+
+head(three_fund_combined_table_of_returns_decreasing, 5)
 ```
 
 This is a great display of a side by side view of the monthly returns for our three funds of comparison for our time period of interest.
@@ -494,7 +548,7 @@ three_fund_long |>
 The tq_performance function in tidyquant allows us to produce statistical metrics for financial analysis for our Peal Fund against each of the benchmark index funds.
 
 ```{r}
-# Pear Fund vs. SPY
+# Pearl Fund vs. SPY
 statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `SPYMonthlyReturns`, performance_fun = table.CAPM)
 
 # Pearl Fund vs. NASDAQ
@@ -508,17 +562,21 @@ statisticsB
 
 The efficient frontier is a concept in financial portfolio theory that represents the set of optimal portfolios that offer the highest expected return for a given level of risk, or the lowest risk for a given level of expected return. It is useful for investors and portfolio managers as it helps identify the optimal balance between risk and return, enabling them to construct portfolios that maximize potential gains while minimizing exposure to volatility.
 
-To apply this framework to our portfolio, we first need to modify our monthly stock returns table so that the date column is removed.
+To apply this framework to our portfolio, we first need to modify our monthly stock returns table so that the date column is removed with once again the 5 most recent returns displayed.
 
 ```{r}
-stock_returns_monthly_wide[, -1]
+stock_returns_monthly_wide_dateless = stock_returns_monthly_wide[, -1]
+
+stock_returns_monthly_wide_decreasing <- arrange(stock_returns_monthly_wide, desc(date))
+
+head(stock_returns_monthly_wide_decreasing[, -1], 5)
 ```
 
 The next step is to simulate, using a loop, a series of random weights which we then apply certain matrices to. The result is a data frame which stores the list of returns and risk values for portfolios of different weights.
 
 ```{r}
 np1 = 1000
-ret2 = stock_returns_monthly_wide[, -1]  #excluding dates
+ret2 = stock_returns_monthly_wide_dateless  #excluding dates
 mu1 = colMeans(ret2)  #mean returns
 na1 = ncol(ret2)  #number of assets
 varc1 = cov(ret2)
@@ -574,10 +632,10 @@ Here is another display of our plot using a different R frontier calculation pac
 return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
 
 efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
-plot(efficient.frontier, c(1, 5))
-
-
+plot(efficient.frontier, c(1, 3, 7))
 ```
+
+Optimal portfolios for a given target risk are displayed by the dark colored dots on the border or *frontier* of the Monte-Carlo simulated data points. The capital allocation line (blue line) which intersects the efficient frontier at a point of tangency indicating the *optimal portfolio* for an investor at the current risk-free rate (10 year yield on government bond).
 
 The following visual is another very useful metric to understand portfolio weightings based on chosen return/risk levels.
 
@@ -598,50 +656,48 @@ The following code generates a series of ETL values for each of our portfolio we
 ```{r}
 
 confidence_level <- 0.95
-
-# CVaR value storage
+np1 <- length(retp1)
 cvar_values <- numeric(np1)
+returns <- rnorm(1000, mean(retp1), mean(riskp1))
+etl_values <- numeric(np1)
 
-# Loop for generating CVaR values
 for (i in 1:np1) {
-  random_sample <- sample(retp1, 1000, replace = TRUE)
+  random_sample <- sample(returns, length(returns), replace = TRUE)
   sorted_returns <- sort(random_sample, decreasing = TRUE)
-  tail_index <- floor((1 - confidence_level) * 1000)
+  tail_index <- floor((1 - confidence_level) * length(returns))
   tail_returns <- sorted_returns[1:tail_index]
-  cvar_values[i] <- mean(tail_returns)
+  etl_values[i] <- mean(tail_returns)
 }
-
-# First 5 values of CVaR
-head(cvar_values, 5)
-
 ```
 
 We add these ETL values to our data frame of Returns and Risk for our various portfolios.
 
 ```{r}
 # Add ETL to this table
-d_p1 = mutate(d_p1, ETL = cvar_values)
+d_p1 = mutate(d_p1, ETL = etl_values)
 print(d_p1)
 ```
 
-Finally, we plot these ETL values against our return values for our portfolios and are able to visualize the results.
+Finally, we plot these ETL values against our return values for our portfolios and are able to visualize the results. By plotting ETL vs. Expected Return, you can assess whether the expected returns of the portfolio adequately compensates for the potential magnitude of extreme losses.
 
 ```{r}
-p1 = ggplot(d_p1, aes(ETL, Ret, colour = Ret))
-# scatter plot
-p1 = p1 + geom_point()
-# scatter plot with density and identified port risk return (highest
-# lowest returns and min risk)
-p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
-    min(d_p1$Ret)), colour = c("darkgreen", "darkgray", "darkred"), size = 1) +
-    geom_vline(xintercept = d_p1[(d_p1$Risk == min(d_p1$Risk)), ][, 2]) +
-    labs(colour = "Portfolio Return", x = "Expected Tail Loss", y = "Portfolio Return",
-        title = "Random Feasible Portfolios") + theme_bw()
+p1 <- ggplot(d_p1, aes(ETL, Ret, colour = Ret)) +
+  geom_point() +
+  geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret), min(d_p1$Ret)),
+             colour = c("darkgreen", "darkgray", "darkred"), size = 1) +
+  geom_vline(xintercept = d_p1[(d_p1$Risk == min(d_p1$Risk)), ][, 2]) +
+  labs(colour = "Portfolio Return",
+       x = "Expected Tail Loss",
+       y = "Portfolio Return",
+       title = "Random Feasible Portfolios") +
+  theme_bw()
+
+p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 ```
 
 ------------------------------------------------------------------------
 
-| Summary, Commentary, & Analysis
+| Summary, Commentary, & Analysis...
 
 ------------------------------------------------------------------------
 
