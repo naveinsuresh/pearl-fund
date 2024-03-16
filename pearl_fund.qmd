@@ -10,7 +10,7 @@ format: html
 
 # Overview
 
-In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises stocks & etfs from a diverse array of industries and asset classes, namely:
+In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises stocks & ETFs from a diverse array of industries and asset classes, namely:
 
 1.  Chevron Corporation (NYSE: CVX)
 2.  Costco Wholesale Corporation (NASDAQ: COST)
@@ -37,6 +37,7 @@ suppressWarnings(suppressPackageStartupMessages({
   library(tidyquant)
   library(corrplot)
   library(quantmod)
+  library(gganimate)
   library(PerformanceAnalytics)
   library(PortfolioAnalytics)
   library(DEoptim)
@@ -84,7 +85,7 @@ head(stock_returns_monthly_full_wide_decreasing, 5)
 
 ```
 
-This data set shows the last 5 monthly returns from 2004 to 5 years prior to today's date.
+The data set below shows the last 5 monthly returns from 2004 to 5 years prior to today's date.
 
 ```{r}
 # Raw Stock Monthly Returns
@@ -101,7 +102,7 @@ stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_
 head(stock_returns_monthly_wide_decreasing, 5)
 ```
 
-We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 year.
+We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 years.
 
 ```{r}
 stock_returns_monthly_test_raw <- tq_get(stock_tickers, get  = "stock.prices", from = Sys.Date() - 1815, to = Sys.Date())
@@ -574,7 +575,7 @@ Here is another display of our plot using a different R frontier calculation pac
 return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
 
 efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
-plot(efficient.frontier, c(1, 5))
+plot(efficient.frontier, c(1,3,5,7))
 
 
 ```
@@ -640,9 +641,3 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
 ```
 
 ------------------------------------------------------------------------
-
-| Summary, Commentary, & Analysis
-
-------------------------------------------------------------------------
-
-## Multiple Portfolio Performance Testing
