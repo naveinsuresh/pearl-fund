@@ -353,7 +353,8 @@ Next, using our optimization libraries we create a portfolio object where we wil
 *Comments on Objectives*
 
 1.  Return -\> aims to create a portfolio to maximize the return
-2.  Risk -\> aims to create a portfolio which minimizes the risk (StdDev, var, etc..)
+2.  Risk Aversion Parameter -\> Sets the level of risk aversion for the optimization. A higher risk aversion value indicates a greater emphasis on minimizing risk in the portfolio.
+3.  Risk -\> aims to create a portfolio which minimizes the risk (StdDev, var, etc..)
 
 ```{r}
 pearlfund = portfolio.spec(assets = assets)
