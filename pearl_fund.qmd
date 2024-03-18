@@ -564,8 +564,8 @@ statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMo
 # Pearl Fund vs. NASDAQ
 statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
 
-statisticsA
-statisticsB
+print(statisticsA)
+print(statisticsB)
 ```
 
 ------------------------------------------------------------------------
