@@ -10,11 +10,7 @@ format: html
 
 # Overview
 
-<<<<<<< HEAD
-In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises Stocks & ETFs from a diverse array of industries and asset classes, namely:
-=======
-In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a select 5-stock portfolio, nicknamed — "Pearl Fund." This portfolio comprises stocks & ETFs from a diverse array of industries and asset classes, namely:
->>>>>>> f859ecd22b7e63a68a8e877a69441b36926754d3
+In this project, our primary goal is to enhance the risk-adjusted returns of a carefully curated portfolio of stocks. The focus of our analysis is on a equity/fixed income portfolio, nicknamed — "Pearl Fund." This portfolio comprises Stocks & ETFs from a diverse array of industries and asset classes, namely:
 
 1.  Chevron Corporation (NYSE: CVX)
 2.  Costco Wholesale Corporation (NASDAQ: COST)
@@ -71,7 +67,7 @@ cat("Latest 10-year Treasury Yield: ",latest_ten_year_treasury_yield,"%")
 
 ### **Monthly Returns (Table View)**
 
-We proceed to collect our monthly stock returns using the tidyquant functions. We split this dataset into two sets, one set ranging from 2004 to 5 years prior to th ecurrent date and another one from the previous 5 years. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks for the entire timeline below.
+We proceed to collect our monthly stock returns using the tidyquant functions. We split this data set into two sets, one set ranging from 2004 to 5 years prior to the current date and another one from the previous 5 years. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks for the entire timeline below.
 
 ```{r}
 
@@ -225,7 +221,7 @@ round(cor_mat * 100, 3)
 
 ```
 
-We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund.
+We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund. The graph below displays the groups of closely related or correlated associations with certain stocks. Additionally, groups of stocks that are directly opposite to other groups (around 180 degrees) show stocks that are correlated in directly opposite directions (ex. MSFT/COST vs. RTX).
 
 ```{r}
 pca = princomp(cor_mat, cor = TRUE)
@@ -251,11 +247,13 @@ pca_df |>
 
 ```
 
-The following visuals will help aid the user with further understanding the correlations between the certain assets and larger groupings. Below we include a correlogram & a heat-map.
+The following visuals will help aid the user with further understanding the correlations between the certain assets and larger groupings. Below we include a correlogram & a heat-map. The correlogram displays the correlations of various stock pairs on a grid to display the direction (blue shows + and red shows -) and the intensity (increasing size/shade of dot shows a value closer to a magnitude of 1). A white box shows a correlation of 0, ruling out a linear association.
 
 ```{r}
 corrplot(cor_mat, method = "circle")
 ```
+
+The dendrogram below shows another display of correlation pairings as well as clustering of certain groups of assets to show similarities/relatedness.
 
 ```{r}
 heatmap(cor_mat)
@@ -564,6 +562,12 @@ statisticsA
 statisticsB
 ```
 
+------------------------------------------------------------------------
+
+| Summary, Commentary, & Analysis...
+
+------------------------------------------------------------------------
+
 ## Mean-Variance Analysis (Efficient Frontier)
 
 The efficient frontier is a concept in financial portfolio theory that represents the set of optimal portfolios that offer the highest expected return for a given level of risk, or the lowest risk for a given level of expected return. It is useful for investors and portfolio managers as it helps identify the optimal balance between risk and return, enabling them to construct portfolios that maximize potential gains while minimizing exposure to volatility.
@@ -622,7 +626,7 @@ p1 + geom_point() + geom_hline(yintercept = c(max(d_p1$Ret), median(d_p1$Ret),
 
 Here is another display of our plot using a different R frontier calculation package. To choose what you'd like to plot exactly in plot(), enter values from below as a vector:
 
-> *Syntax for choosing vector in plot function above:*
+> *Syntax for choosing vector in plot function below:*
 >
 > 1.  Efficient Frontier
 > 2.  Global Minimum Variance Portfolio
@@ -638,13 +642,11 @@ Here is another display of our plot using a different R frontier calculation pac
 return.matrix = as.timeSeries(stock_returns_monthly_wide[, -1])
 
 efficient.frontier = portfolioFrontier(return.matrix, `setRiskFreeRate<-`(portfolioSpec(), (latest_ten_year_treasury_yield/100)/12), constraints = "LongOnly" )
-<<<<<<< HEAD
+
 plot(efficient.frontier, c(1, 3, 7))
-=======
 plot(efficient.frontier, c(1,3,5,7))
 
 
->>>>>>> f859ecd22b7e63a68a8e877a69441b36926754d3
 ```
 
 Optimal portfolios for a given target risk are displayed by the dark colored dots on the border or *frontier* of the Monte-Carlo simulated data points. The capital allocation line (blue line) which intersects the efficient frontier at a point of tangency indicating the *optimal portfolio* for an investor at the current risk-free rate (10 year yield on government bond).
@@ -707,13 +709,4 @@ p1 <- ggplot(d_p1, aes(ETL, Ret, colour = Ret)) +
 p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 ```
 
-------------------------------------------------------------------------
-<<<<<<< HEAD
-
-| Summary, Commentary, & Analysis...
-
-------------------------------------------------------------------------
-
 ## Multiple Portfolio Performance Testing
-=======
->>>>>>> f859ecd22b7e63a68a8e877a69441b36926754d3
