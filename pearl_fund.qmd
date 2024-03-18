@@ -126,7 +126,7 @@ stock_returns_monthly_raw1 <- stock_returns_monthly_raw %>%
   ggplot(aes(date, return, color = symbol)) + 
   geom_line() +
   labs(title = "Stock Performance Over Time Period",
-       y = "Return (%) on a log scale") +
+       y = "Return (%)") +
   theme_minimal()
 stock_returns_monthly_raw1
 ```
@@ -163,12 +163,12 @@ Stock_Statistics
 ```
 
 ```{r}
-abcd = ggplot(Stock_Statistics, aes(x = Standard_Deviation, y = Historic_Expected_Returns, color = symbol)) +
+animation1 = ggplot(Stock_Statistics, aes(x = Standard_Deviation, y = Historic_Expected_Returns, color = symbol)) +
 geom_point(size = 5) +
 theme_bw() + ggtitle(" Monthly Historic Risk-Return Tradeoff") +
 xlab("Volatility") + ylab("Expected Returns")
 
-ggplotly(abcd)
+ggplotly(animation1)
 ```
 
 #### **Calculation of Excess Returns**
@@ -214,7 +214,7 @@ cat("\n")
 
 cor_mat = cor(M)
 
-#Correlation Matrix with percentage 
+# Correlation Matrix with percentage 
 cat("Correlation Matrix as percentages")
 cat("\n")
 round(cor_mat * 100, 3)
@@ -288,7 +288,7 @@ nasdaq_returns_monthly_raw <- tq_get("QQQ", get = "stock.prices", from = "2004-0
 # Transformed NASDAQ Monthly Returns
 nasdaq_returns_monthly = tq_transmute(nasdaq_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "NASDAQMonthlyReturns")
 
-### Transforms data into percentages ###
+# Transforms data into percentages 
 nasdaq_returns_monthly_percentages = data.frame("date" = nasdaq_returns_monthly$date, "NASDAQPercentReturns" = nasdaq_returns_monthly$NASDAQMonthlyReturns * 100)
 
 # Displays the most recent 5 monthly NASDAQ returns (%)
@@ -323,10 +323,6 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-| Summary, Commentary, & Analysis...
-
-------------------------------------------------------------------------
-
 ## Portfolio Optimization
 
 The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. We will also be utilizing other constraints and objectives to customize what we aim with our financial returns. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
@@ -351,7 +347,7 @@ Next, using our optimization libraries we create a portfolio object where we wil
 *Comments on Objectives*
 
 1.  Return -\> aims to create a portfolio to maximize the return
-2.  Risk Aversion Parameter -\> Sets the level of risk aversion for the optimization. A higher risk aversion value indicates a greater emphasis on minimizing risk in the portfolio.
+2.  Risk Aversion Parameter -\> sets the level of risk aversion for the optimization. A higher risk aversion value indicates a greater emphasis on minimizing risk in the portfolio.
 3.  Risk -\> aims to create a portfolio which minimizes the risk (StdDev, var, etc..)
 
 ```{r}
@@ -361,7 +357,7 @@ print(pearlfund)
 # CONSTRAINTS
 
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
-pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
+# pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
 pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.80)
 # pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0150)
 
@@ -403,7 +399,7 @@ The visual below displays how much you would have right now if you had invested 
 > \*Please note that this does not account for tax consequences, which could reduce your final capital depending on tax policy and brackets
 
 ```{r}
-### Data Retstructuring
+## Data Retstructuring
 
 # Pearl Fund
 
@@ -411,6 +407,16 @@ aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
     tq_portfolio(assets_col = symbol, 
                  returns_col= `MonthlyReturns`, 
                  weights = optimized_vector_of_weights,
+                 col_rename   = "investment.growth",
+                 wealth.index = TRUE) %>% 
+  mutate(investment.growth = investment.growth * 10000)
+
+# Pearl Fund - Equally Weighted 
+
+equally_weighted_portfolio_monthly_returns <- stock_returns_monthly_long %>%
+    tq_portfolio(assets_col = symbol, 
+                 returns_col= `MonthlyReturns`, 
+                 weights = init_weights,
                  col_rename   = "investment.growth",
                  wealth.index = TRUE) %>% 
   mutate(investment.growth = investment.growth * 10000)
@@ -564,10 +570,6 @@ statisticsB
 
 ------------------------------------------------------------------------
 
-| Summary, Commentary, & Analysis...
-
-------------------------------------------------------------------------
-
 ## Mean-Variance Analysis (Efficient Frontier)
 
 The efficient frontier is a concept in financial portfolio theory that represents the set of optimal portfolios that offer the highest expected return for a given level of risk, or the lowest risk for a given level of expected return. It is useful for investors and portfolio managers as it helps identify the optimal balance between risk and return, enabling them to construct portfolios that maximize potential gains while minimizing exposure to volatility.
@@ -689,7 +691,7 @@ We add these ETL values to our data frame of Returns and Risk for our various po
 ```{r}
 # Add ETL to this table
 d_p1 = mutate(d_p1, ETL = etl_values)
-print(d_p1)
+head(d_p1)
 ```
 
 Finally, we plot these ETL values against our return values for our portfolios and are able to visualize the results. By plotting ETL vs. Expected Return, you can assess whether the expected returns of the portfolio adequately compensates for the potential magnitude of extreme losses.
@@ -709,4 +711,26 @@ p1 <- ggplot(d_p1, aes(ETL, Ret, colour = Ret)) +
 p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 ```
 
-## Multiple Portfolio Performance Testing
+------------------------------------------------------------------------
+
+## Conclusion 
+
+```{r}
+animation2 = ggplot() +
+  geom_line(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+            linewidth = 2, color = "red") +
+  geom_smooth(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+              method = "loess", color = "red", se = FALSE) +
+  geom_line(data = equally_weighted_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+            linewidth = 2, color = "blue") +
+  geom_smooth(data = equally_weighted_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+              method = "loess", color = "blue", se = FALSE) +
+  labs(title = "Pearl Fund Optimized Portfolio Growth vs. Equally Weighted Portfolio",
+       subtitle = "Optimized Portfolio Growth",
+       caption = "Performance growth over our 20-year horizon",
+       x = "Year", y = "Portfolio Value") +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_minimal()
+
+ggplotly(animation2)
+```
