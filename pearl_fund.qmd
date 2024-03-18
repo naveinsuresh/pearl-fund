@@ -715,6 +715,8 @@ p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 
 ## Conclusion 
 
+To conclude, we plot the Optimized Pearl Fund Portfolio (in red) versus the Equally Weighted Pearl Fund Portfolio (in blue). As evident in the graph below, the Optimized Portfolio generates higher returns than the Equally Weighted Portfolio, while rising more steadily.
+
 ```{r}
 animation2 = ggplot() +
   geom_line(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
