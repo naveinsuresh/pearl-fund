@@ -51,7 +51,7 @@ suppressWarnings(suppressPackageStartupMessages({
 
 ```
 
-## Equity Analysis
+# Equity Analysis
 
 Our analysis spans from January 1, 2004, until the latest market day close, providing a comprehensive view of various economic scenarios, including critical events such as the global financial crisis of 2008 and the SARS COVID-19 epidemic in 2020. We use the FRED economic data set to retrieve the most recent 10-year Treasury yields for our statistical testing we will run later.
 
@@ -65,7 +65,7 @@ latest_ten_year_treasury_yield = slice(ten_year_treasury_yield_table, 1)$price
 cat("Latest 10-year Treasury Yield: ",latest_ten_year_treasury_yield,"%")
 ```
 
-### **Monthly Returns (Table View)**
+## Monthly Returns (Table View)
 
 We proceed to collect our monthly stock returns using the tidyquant functions. We split this data set into two sets, one set ranging from 2004 to 5 years prior to the current date and another one from the previous 5 years. After some data pre-processing, we display the 5 most recent monthly returns for each of our stocks for the entire timeline below.
 
@@ -115,7 +115,7 @@ stock_returns_monthly_test_wide_decreasing =  stock_returns_monthly_test_wide[or
 head(stock_returns_monthly_test_wide_decreasing, 5)
 ```
 
-### **Stock Growth & Monthly Returns (Graph View)**
+## **Stock Growth & Monthly Returns (Graph View)**
 
 Displayed below is a graphical representation of the total returns (%) for our chosen stocks covering the chosen time period. To facilitate accurate time series analysis, the data has been standardized.
 
@@ -153,7 +153,7 @@ stock_returns_monthly_long %>% ggplot(aes(date, `MonthlyReturns`, color=symbol))
   facet_wrap(~ symbol)
 ```
 
-### Statistical Metrics
+## Statistical Metrics
 
 We calculate the expected returns (based off historical returns), standard deviations, variance, and total count for each of our assets.
 
@@ -171,7 +171,7 @@ xlab("Volatility") + ylab("Expected Returns")
 ggplotly(animation1)
 ```
 
-#### **Calculation of Excess Returns**
+**Calculation of Excess Returns**
 
 Moving forward, our analysis involves the computation of excess returns. This is achieved by subtracting our anticipated monthly return value from each historical monthly return value, resulting in an array of excess returns. This practice is widely adopted in risk-adjusted portfolio analysis to refine the assessment of portfolio performance.
 
@@ -227,7 +227,7 @@ We run a *Principal Component Analysis* calculation to display the groupings and
 pca = princomp(cor_mat, cor = TRUE)
 pca_df = as.data.frame(cor(cor_mat, pca$scores))
 
-pca_df |>
+suppressWarnings(suppressPackageStartupMessages({pca_df |>
   ggplot(aes(x = Comp.1, y = Comp.2)) +
   geom_point(alpha = 0.3) +
   geom_text(label = rownames(pca_df)) + 
@@ -243,7 +243,7 @@ pca_df |>
                color = "blue", 
                data = subset(pca_df, rownames(pca_df) %in% c("TLT", "MSFT", "HPQ", "COST", "F", "PEP", "JPM", "RTX", "PG", "CVX", "JNJ")),  # Add ticker symbols here
                size = 0.5, 
-               lineend = "round")
+               lineend = "round")}))
 
 ```
 
@@ -259,6 +259,8 @@ The dendrogram below shows another display of correlation pairings as well as cl
 heatmap(cor_mat)
 ```
 
+# Benchmark Performance
+
 Upon acquiring the historical monthly stock returns for our designated time frame, our focus shifts to the evaluation of the two ETFs of the comparison benchmark index funds—SPDR S&P 500 ETF Trust (NYSE: SPY) and NASDAQ COMPOSITE (NYSE: QQQ). We display the 5 most recent SPY & NASDAQ Monthly returns available.
 
 **S&P 500 (Monthly % Returns):**
@@ -270,7 +272,7 @@ spy_returns_monthly_raw <- tq_get("SPY", get = "stock.prices", from = "2004-01-0
 # Transformed S&P 500 Monthly Returns
 spy_returns_monthly = tq_transmute(spy_returns_monthly_raw, select = adjusted, mutate_fun = periodReturn, period = "monthly", col_rename = "SPYMonthlyReturns")
 
-### Transforms data into percentages ###
+# Transforms data into percentages 
 spy_returns_monthly_percentages = data.frame("date" = spy_returns_monthly$date, "SPYPercentReturns" = spy_returns_monthly$SPYMonthlyReturns * 100)
 
 # Displays the most recent 5 monthly SPY returns (%)
@@ -323,11 +325,11 @@ benchmark_long |>
 
 ------------------------------------------------------------------------
 
-## Portfolio Optimization
+# Portfolio Optimization
 
 The groundwork laid by our analysis and statistical metrics sets the stage for the upcoming portfolio optimization process. Drawing inspiration from the tenets of Modern Portfolio Theory (MPT), our objective is to optimize the portfolio of assets. Employing a mean-variance framework analysis, we seek to maximize expected returns for a specified level of risk tolerance, represented by standard deviation. We will also be utilizing other constraints and objectives to customize what we aim with our financial returns. Our approach involves leveraging concepts such as the efficient set mathematics, efficient frontier model, and other relevant methodologies.
 
-#### Equally Weighted Portfolio Initialization
+**Equally Weighted Portfolio Initialization**
 
 ```{r}
 init_weights = rep((1/length(stock_tickers)), length(stock_tickers))
@@ -390,20 +392,20 @@ optimized_vector_of_weights = unlist(optimized_list_of_weights)
 optimized_vector_of_weights
 ```
 
-### Optimized Portfolio Visualizations
+## Optimized Portfolio Visualizations
 
-#### Fund Total Growth Return
+### Fund Total Growth Return
 
 The visual below displays how much you would have right now if you had invested \$10,000 at the start of the time period till today.
 
 > \*Please note that this does not account for tax consequences, which could reduce your final capital depending on tax policy and brackets
 
 ```{r}
-## Data Retstructuring
+# Data Retstructuring
 
 # Pearl Fund
 
-aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
+aggregate_portfolio_monthly_returns_growth <- stock_returns_monthly_long %>%
     tq_portfolio(assets_col = symbol, 
                  returns_col= `MonthlyReturns`, 
                  weights = optimized_vector_of_weights,
@@ -413,7 +415,7 @@ aggregate_portfolio_monthly_returns <- stock_returns_monthly_long %>%
 
 # Pearl Fund - Equally Weighted 
 
-equally_weighted_portfolio_monthly_returns <- stock_returns_monthly_long %>%
+equally_weighted_portfolio_monthly_returns_growth <- stock_returns_monthly_long %>%
     tq_portfolio(assets_col = symbol, 
                  returns_col= `MonthlyReturns`, 
                  weights = init_weights,
@@ -450,7 +452,7 @@ nasdaq_returns_monthly_ticker_growth <- nasdaq_returns_monthly_ticker %>%
   mutate(investment.growth = investment.growth * 10000)
 
 # Pearl Fund Portfolio Growth
-ggplot(aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth)) +
+ggplot(aggregate_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth)) +
   geom_line(linewidth = 2, color = "red") +
   geom_smooth(method = "loess") +
   labs(title = "Pearl Fund Portfolio Growth",
@@ -464,7 +466,7 @@ ggplot(spy_returns_monthly_ticker_growth, aes(x = date, y = investment.growth)) 
   geom_line(linewidth = 2, color = "blue") +
   geom_smooth(method = "loess") +
   labs(title = "SPY Portfolio Growth",
-       subtitle = "Optimized Portfolio Growth",
+       subtitle = "Portfolio Growth",
        caption = "Performance growth over our 20-year horizon",
        x = "Year", y = "Portfolio Value") +
   scale_y_continuous(labels = scales::dollar)
@@ -474,13 +476,13 @@ ggplot(nasdaq_returns_monthly_ticker_growth, aes(x = date, y = investment.growth
   geom_line(linewidth = 2, color = "green") +
   geom_smooth(method = "loess") +
   labs(title = "NASDAQ Portfolio Growth",
-       subtitle = "Optimized Portfolio Growth",
+       subtitle = "Portfolio Growth",
        caption = "Performance growth over our 20-year horizon",
        x = "Year", y = "Portfolio Value") +
   scale_y_continuous(labels = scales::dollar)
 ```
 
-#### Fund Monthly Returns
+### Fund Monthly Returns
 
 The following visual displays a scatter plot of the monthly returns throughout the time period of interest. A trend line (using "loess") is fitted onto the graph to display the variation and direction at different regions of the scatter plot.
 
@@ -492,7 +494,7 @@ aggregate_portfolio_monthly_returns %>% ggplot(aes(x = date, y = `AggregateMonth
   theme_tq() + scale_color_tq() + scale_y_continuous(labels = scales::percent)
 ```
 
-#### Annualized Returns
+### Annualized Returns
 
 To get a better appreciation for the fund's return, we proceed to annualize the the monthly returns.
 
@@ -506,7 +508,7 @@ names(annualized_return) = "Annualized Return"
 cat("Annualized Return:", annualized_return)
 ```
 
-## Comparative Statistical Analysis
+# Comparative Statistical Analysis
 
 To objectively test our portfolio, we will be calculating several financial metrics in relation to both our benchmarks — SPY & QQQ.
 
@@ -570,7 +572,7 @@ as.data.frame(statisticsB)
 
 ------------------------------------------------------------------------
 
-## Mean-Variance Analysis (Efficient Frontier)
+# Mean-Variance Analysis (Efficient Frontier)
 
 The efficient frontier is a concept in financial portfolio theory that represents the set of optimal portfolios that offer the highest expected return for a given level of risk, or the lowest risk for a given level of expected return. It is useful for investors and portfolio managers as it helps identify the optimal balance between risk and return, enabling them to construct portfolios that maximize potential gains while minimizing exposure to volatility.
 
@@ -713,19 +715,19 @@ p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 
 ------------------------------------------------------------------------
 
-## Conclusion 
+# Conclusion 
 
 To conclude, we plot the Optimized Pearl Fund Portfolio (in red) versus the Equally Weighted Pearl Fund Portfolio (in blue). As evident in the graph below, the Optimized Portfolio generates higher returns than the Equally Weighted Portfolio, while rising more steadily.
 
 ```{r}
 ggplot() +
-  geom_line(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+  geom_line(data = aggregate_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
             linewidth = 2, color = "red") +
-  geom_smooth(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+  geom_smooth(data = aggregate_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
               method = "loess", color = "red", se = FALSE) +
-  geom_line(data = equally_weighted_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+  geom_line(data = equally_weighted_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
             linewidth = 2, color = "blue") +
-  geom_smooth(data = equally_weighted_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
+  geom_smooth(data = equally_weighted_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
               method = "loess", color = "blue", se = FALSE) +
   labs(title = "Pearl Fund Optimized Portfolio Growth vs. Equally Weighted Portfolio",
        subtitle = ,
