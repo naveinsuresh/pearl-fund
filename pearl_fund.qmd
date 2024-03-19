@@ -221,7 +221,7 @@ round(cor_mat * 100, 3)
 
 ```
 
-We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund. The graph below displays the groups of closely related or correlated associations with certain stocks. Additionally, groups of stocks that are directly opposite to other groups (around 180 degrees) show stocks that are correlated in directly opposite directions (ex. MSFT/COST vs. RTX).
+We run a *Principal Component Analysis* calculation to display the groupings and correlations among the various assets in the pearl fund. The graph below displays the groups of closely related or correlated associations with certain stocks. The horizontal axis (Comp.1) and the vertical axis (Comp.2) represent the first two principal components derived from the PCA. These are the two dimensions that capture the most variance in the data set. From an investment standpoint, this plot might help in understanding which stocks move together (correlated), and potentially, it might help in identifying which stocks contribute most to the variance in the portfolio. This could be used for risk management and diversification; for instance, once might choose to invest in stocks that are less correlated with each other according to the PCA results. For example, the biplot shows that **`TLT`**, which is an ETF that tracks long-term treasury bonds, has a very different loading compared to other assets, indicating that its price movements are likely less correlated with those of the stocks.
 
 ```{r}
 pca = princomp(cor_mat, cor = TRUE)
@@ -358,14 +358,14 @@ print(pearlfund)
 
 pearlfund = add.constraint(portfolio=pearlfund, type="weight_sum", min_sum=1, max_sum=1)
 # pearlfund <- add.constraint(portfolio=pearlfund, type="leverage", min_sum=0.99, max_sum=1.01)
-pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.05, max=0.80)
+pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.00, max=1)
 # pearlfund = add.constraint(portfolio=pearlfund, type="return", return_target=0.0150)
 
 # OBJECTIVES
 
 pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
-#pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
-pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
+pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
+# pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
 
@@ -564,8 +564,8 @@ statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMo
 # Pearl Fund vs. NASDAQ
 statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
 
-print(statisticsA)
-print(statisticsB)
+as.data.frame(statisticsA)
+as.data.frame(statisticsB)
 ```
 
 ------------------------------------------------------------------------
@@ -718,7 +718,7 @@ p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 To conclude, we plot the Optimized Pearl Fund Portfolio (in red) versus the Equally Weighted Pearl Fund Portfolio (in blue). As evident in the graph below, the Optimized Portfolio generates higher returns than the Equally Weighted Portfolio, while rising more steadily.
 
 ```{r}
-animation2 = ggplot() +
+ggplot() +
   geom_line(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
             linewidth = 2, color = "red") +
   geom_smooth(data = aggregate_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
@@ -728,11 +728,10 @@ animation2 = ggplot() +
   geom_smooth(data = equally_weighted_portfolio_monthly_returns, aes(x = date, y = investment.growth), 
               method = "loess", color = "blue", se = FALSE) +
   labs(title = "Pearl Fund Optimized Portfolio Growth vs. Equally Weighted Portfolio",
-       subtitle = "Optimized Portfolio Growth",
+       subtitle = ,
        caption = "Performance growth over our 20-year horizon",
        x = "Year", y = "Portfolio Value") +
   scale_y_continuous(labels = scales::dollar) +
-  theme_minimal()
+ theme_minimal()
 
-ggplotly(animation2)
 ```
