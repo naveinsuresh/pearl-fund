@@ -1,11 +1,18 @@
 ---
-title: "Pearl Fund: A Guide on Portfolio Anlaysis & Optmization"
+title: "Pearl Fund: Portfolio Anlaysis & Optmization"
 author: "Navein Suresh & Suryaveer Singh"
-date: Sys.Date()
+date: "`r format(Sys.Date(), '%d %B, %Y')`"
 editor: visual
 toc: True
 highlight-style: pygments
-format: html
+format:
+  html: 
+    code-fold: true
+    html-math-method: katex
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
 ---
 
 # Overview
@@ -25,6 +32,12 @@ In this project, our primary goal is to enhance the risk-adjusted returns of a c
 11. iShares 20+ Year Treasury Bond ETF (NASDAQ: TLT)
 
 Our approach involves the utilization of sophisticated financial models, which will be thoroughly explained later in this documentation. Furthermore, we leverage the power of various statistical and financial packages. We use th R programming language as our preferred tool for seamless portfolio optimization. Through a comprehensive analysis of historical data, we aim to evaluate and compare the performance of our portfolio against two benchmark index funds—S&P 500 and NASDAQ.
+
+::: callout-tip
+💡 Detailed Background Overview: [Pearl Fund](https://drive.google.com/file/d/1xbmX7GZ3pakPfEb3VJlRCiLe_34yudnt/view?usp=sharing)
+:::
+
+Once you're familiarized with the code, feel free to explore and add your own curated collections of assets to see how they perform! To this make sure to enter the *exchange traded ticker symbols* to the *stock_tickers* vector in the second cell below. You must ensure that the assets you choose were traded on an exchange from a minimum of 2004 onward.
 
 Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project:
 
@@ -81,7 +94,7 @@ stock_returns_monthly_full_wide = pivot_wider(stock_returns_monthly_full_long, n
 
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_full_wide_decreasing =  stock_returns_monthly_full_wide[order(stock_returns_monthly_full_wide$date, decreasing = TRUE), ]
-head(stock_returns_monthly_full_wide_decreasing, 5)
+as.data.frame(head(stock_returns_monthly_full_wide_decreasing, 5))
 
 ```
 
@@ -99,7 +112,7 @@ stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=
 
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
-head(stock_returns_monthly_wide_decreasing, 5)
+as.data.frame(head(stock_returns_monthly_wide_decreasing, 5))
 ```
 
 We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 years.
@@ -112,7 +125,7 @@ stock_returns_monthly_test_long = stock_returns_monthly_test_raw %>% group_by(sy
 stock_returns_monthly_test_wide = pivot_wider(stock_returns_monthly_test_long, names_from=symbol, values_from=MonthlyReturns2nd)
 
 stock_returns_monthly_test_wide_decreasing =  stock_returns_monthly_test_wide[order(stock_returns_monthly_test_wide$date, decreasing = TRUE), ]
-head(stock_returns_monthly_test_wide_decreasing, 5)
+as.data.frame(head(stock_returns_monthly_test_wide_decreasing, 5))
 ```
 
 ## **Stock Growth & Monthly Returns (Graph View)**
@@ -544,7 +557,7 @@ three_fund_combined_table_of_returns_decreasing <- arrange(three_fund_combined_t
 head(three_fund_combined_table_of_returns_decreasing, 5)
 ```
 
-This is a great display of a side by side view of the monthly returns for our three funds of comparison for our time period of interest.
+This is a great display of a side by side view of the monthly returns for our three funds of comparison for our time period of interest. The following visuals are a great measure of the overall volatility of our portfolio compared to the two benchmarks. Graphs that display more "ups" and "downs" with monthly returns indicate larger deviations from the mean. Given similar annualized returns and expected long term value, a risk-averse investor should prefer the portfolios/funds which minimize the volatility/risk for the given time period.
 
 ```{r}
 three_fund_long = three_fund_combined_table_of_returns |> 
@@ -715,7 +728,7 @@ p1 + xlim(min(d_p1$ETL), max(d_p1$ETL)) + ylim(min(d_p1$Ret), max(d_p1$Ret))
 
 ------------------------------------------------------------------------
 
-# Conclusion 
+# Conclusion
 
 To conclude, we plot the Optimized Pearl Fund Portfolio (in red) versus the Equally Weighted Pearl Fund Portfolio (in blue). As evident in the graph below, the Optimized Portfolio generates higher returns than the Equally Weighted Portfolio, while rising more steadily.
 
