@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Navein Suresh &amp; Suryaveer Singh">
-<meta name="dcterms.date" content="2024-03-19">
+<meta name="dcterms.date" content="2024-03-20">
 
 <title>Pearl Fund: Portfolio Anlaysis &amp; Optmization</title>
 <style>
@@ -149,7 +149,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">March 19, 2024</p>
+      <p class="date">March 20, 2024</p>
     </div>
   </div>
   
@@ -231,7 +231,7 @@ Tip
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Latest 10-year Treasury Yield: "</span>,latest_ten_year_treasury_yield,<span class="st">"%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Latest 10-year Treasury Yield:  4.34 %</code></pre>
+<pre><code>Latest 10-year Treasury Yield:  4.3 %</code></pre>
 </div>
 </div>
 <section id="monthly-returns-table-view" class="level2">
@@ -254,17 +254,17 @@ Tip
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date         TLT         MSFT         HPQ        COST           F
-1 2024-03-18 -0.01304786  0.008896607  0.06636740 -0.01660197 -0.02090026
+1 2024-03-19 -0.01027857  0.018784423  0.06209335 -0.01575506 -0.01125397
 2 2024-02-29 -0.02252203  0.042318377 -0.01323577  0.07210393  0.09007387
 3 2024-01-31 -0.02245145  0.057281150 -0.04586244  0.05272086 -0.03855610
-4 2023-12-29  0.08685759 -0.007574393  0.03496809  0.13893188  0.18810908
-5 2023-11-30  0.09923885  0.122945401  0.11431823  0.07491814  0.05230767
+4 2023-12-29  0.08685750 -0.007574393  0.03496809  0.13893188  0.18810908
+5 2023-11-30  0.09923874  0.122945401  0.11431823  0.07491826  0.05230767
            PEP        JPM          RTX          PG          CVX         JNJ
-1  0.035804998 0.03547246  0.042266098  0.01428215  0.022367011 -0.02862815
+1  0.039071047 0.04154572  0.057878918  0.01818296  0.030326957 -0.03203618
 2 -0.011441607 0.06710253 -0.009434506  0.01145477  0.042316332  0.02331857
 3 -0.007713055 0.03136482  0.082956981  0.07910756 -0.011598336  0.01378068
 4  0.009210248 0.08982576  0.032646025 -0.04546644  0.038718657  0.01344889
-5  0.038542747 0.12239323  0.008485331  0.02326199 -0.004286768  0.05095416</code></pre>
+5  0.038542747 0.12239323  0.008485235  0.02326199 -0.004286768  0.05095416</code></pre>
 </div>
 </div>
 <p>The data set below shows the last 5 monthly returns from 2004 to 5 years prior to today’s date.</p>
@@ -286,17 +286,17 @@ Tip
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date          TLT        MSFT          HPQ        COST            F
-1 2019-03-29  0.055716510  0.05275368 -0.006859819  0.10697622  0.001139899
-2 2019-02-28 -0.013764005  0.07735739 -0.104403072  0.02190221 -0.003408788
-3 2019-01-31  0.003785516  0.02815804  0.076735179  0.05360521  0.170367268
-4 2018-12-31  0.058534979 -0.08404737 -0.104077808 -0.11920609 -0.187035129
-5 2018-11-30  0.017872279  0.04268380 -0.047224674  0.01399552 -0.014659842
+1 2019-03-29  0.055716434  0.05275368 -0.006859132  0.10697638  0.001140035
+2 2019-02-28 -0.013764143  0.07735762 -0.104403473  0.02190197 -0.003409195
+3 2019-01-31  0.003786082  0.02815804  0.076735171  0.05360546  0.170367400
+4 2018-12-31  0.058535001 -0.08404731 -0.104077886 -0.11920597 -0.187035105
+5 2018-11-30  0.017871898  0.04268381 -0.047224395  0.01399530 -0.014659651
           PEP          JPM         RTX          PG         CVX         JNJ
-1  0.05975446 -0.029992141  0.02562265  0.05580917  0.03010525  0.02305316
-2  0.03468267  0.008308974  0.07069368  0.02156122  0.05348506  0.03356051
-3  0.01982249  0.068843851  0.10884677  0.05780033  0.05386553  0.03122834
-4 -0.08678637 -0.122043305 -0.12606692 -0.02740453 -0.08533730 -0.12151116
-5  0.08506849  0.019904711 -0.01345501  0.06574192  0.07570479  0.05604301</code></pre>
+1  0.05975438 -0.029992311  0.02562254  0.05580926  0.03010534  0.02305323
+2  0.03468283  0.008309147  0.07069367  0.02156094  0.05348507  0.03356051
+3  0.01982258  0.068843765  0.10884682  0.05780052  0.05386498  0.03122813
+4 -0.08678665 -0.122043386 -0.12606706 -0.02740453 -0.08533698 -0.12151109
+5  0.08506873  0.019904628 -0.01345478  0.06574202  0.07570451  0.05604294</code></pre>
 </div>
 </div>
 <p>We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 years.</p>
@@ -314,17 +314,17 @@ Tip
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date         TLT         MSFT         HPQ        COST           F
-1 2024-03-18 -0.01304786  0.008896607  0.06636740 -0.01660197 -0.02090026
-2 2024-02-29 -0.02252211  0.042318377 -0.01323577  0.07210393  0.09007387
-3 2024-01-31 -0.02245129  0.057281150 -0.04586244  0.05272086 -0.03855610
-4 2023-12-29  0.08685742 -0.007574393  0.03496809  0.13893188  0.18810908
-5 2023-11-30  0.09923874  0.122945401  0.11431823  0.07491826  0.05230767
+1 2024-03-19 -0.01027857  0.018784423  0.06209335 -0.01575506 -0.01125397
+2 2024-02-29 -0.02252203  0.042318377 -0.01323577  0.07210393  0.09007387
+3 2024-01-31 -0.02245145  0.057281150 -0.04586244  0.05272086 -0.03855610
+4 2023-12-29  0.08685769 -0.007574393  0.03496809  0.13893188  0.18810908
+5 2023-11-30  0.09923865  0.122945401  0.11431823  0.07491826  0.05230767
            PEP        JPM          RTX          PG          CVX         JNJ
-1  0.035804998 0.03547246  0.042266098  0.01428215  0.022367011 -0.02862815
+1  0.039071047 0.04154572  0.057878918  0.01818296  0.030326957 -0.03203618
 2 -0.011441607 0.06710253 -0.009434506  0.01145477  0.042316332  0.02331857
 3 -0.007713055 0.03136482  0.082956981  0.07910756 -0.011598336  0.01378068
 4  0.009210248 0.08982576  0.032646025 -0.04546644  0.038718657  0.01344889
-5  0.038542747 0.12239323  0.008485235  0.02326199 -0.004286768  0.05095416</code></pre>
+5  0.038542747 0.12239323  0.008485331  0.02326199 -0.004286768  0.05095416</code></pre>
 </div>
 </div>
 </section>
@@ -416,8 +416,8 @@ Tip
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(animation1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-ec3d989ed2ff32a17d60" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-ec3d989ed2ff32a17d60">{"x":{"data":[{"x":[0.0527322031867841],"y":[0.0134925979151457],"text":"Standard_Deviation: 0.05273220<br />Historic_Expected_Returns: 0.013492598<br />symbol: COST","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"COST","legendgroup":"COST","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0564814780887822],"y":[0.0102988551496737],"text":"Standard_Deviation: 0.05648148<br />Historic_Expected_Returns: 0.010298855<br />symbol: CVX","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(219,142,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(219,142,0,1)"}},"hoveron":"points","name":"CVX","legendgroup":"CVX","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.142856466319544],"y":[0.00766315840532351],"text":"Standard_Deviation: 0.14285647<br />Historic_Expected_Returns: 0.007663158<br />symbol: F","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(174,162,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(174,162,0,1)"}},"hoveron":"points","name":"F","legendgroup":"F","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0809011541813995],"y":[0.00818598338687919],"text":"Standard_Deviation: 0.08090115<br />Historic_Expected_Returns: 0.008185983<br />symbol: HPQ","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(100,178,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(100,178,0,1)"}},"hoveron":"points","name":"HPQ","legendgroup":"HPQ","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0392746517075693],"y":[0.00858347399377369],"text":"Standard_Deviation: 0.03927465<br />Historic_Expected_Returns: 0.008583474<br />symbol: JNJ","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,189,92,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,189,92,1)"}},"hoveron":"points","name":"JNJ","legendgroup":"JNJ","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0764367998617275],"y":[0.0106919681802726],"text":"Standard_Deviation: 0.07643680<br />Historic_Expected_Returns: 0.010691968<br />symbol: JPM","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,193,167,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,193,167,1)"}},"hoveron":"points","name":"JPM","legendgroup":"JPM","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0649313372833465],"y":[0.012398867577901],"text":"Standard_Deviation: 0.06493134<br />Historic_Expected_Returns: 0.012398868<br />symbol: MSFT","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,222,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,186,222,1)"}},"hoveron":"points","name":"MSFT","legendgroup":"MSFT","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0405140972652379],"y":[0.00837890964204367],"text":"Standard_Deviation: 0.04051410<br />Historic_Expected_Returns: 0.008378910<br />symbol: PEP","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,166,255,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,166,255,1)"}},"hoveron":"points","name":"PEP","legendgroup":"PEP","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0421689599640028],"y":[0.0073145003366694],"text":"Standard_Deviation: 0.04216896<br />Historic_Expected_Returns: 0.007314500<br />symbol: PG","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(179,133,255,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(179,133,255,1)"}},"hoveron":"points","name":"PG","legendgroup":"PG","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.053486743364141],"y":[0.00876348940746742],"text":"Standard_Deviation: 0.05348674<br />Historic_Expected_Returns: 0.008763489<br />symbol: RTX","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(239,103,235,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(239,103,235,1)"}},"hoveron":"points","name":"RTX","legendgroup":"RTX","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0368907014659964],"y":[0.00581217098650239],"text":"Standard_Deviation: 0.03689070<br />Historic_Expected_Returns: 0.005812171<br />symbol: TLT","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(255,99,182,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(255,99,182,1)"}},"hoveron":"points","name":"TLT","legendgroup":"TLT","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":54.7945205479452},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":" Monthly Historic Risk-Return Tradeoff","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.031592413223319,0.148154754562221],"tickmode":"array","ticktext":["0.06","0.09","0.12"],"tickvals":[0.06,0.09,0.12],"categoryorder":"array","categoryarray":["0.06","0.09","0.12"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Volatility","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.00542814964007023,0.0138766192615778],"tickmode":"array","ticktext":["0.006","0.008","0.010","0.012"],"tickvals":[0.006,0.008,0.01,0.012],"categoryorder":"array","categoryarray":["0.006","0.008","0.010","0.012"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Expected Returns","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"title":{"text":"symbol","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5e1b625993d5":{"x":{},"y":{},"colour":{},"type":"scatter"}},"cur_data":"5e1b625993d5","visdat":{"5e1b625993d5":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-ee638c38d58dd94a3483" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-ee638c38d58dd94a3483">{"x":{"data":[{"x":[0.0527322028095739],"y":[0.013492596044963],"text":"Standard_Deviation: 0.05273220<br />Historic_Expected_Returns: 0.013492596<br />symbol: COST","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"COST","legendgroup":"COST","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0564814432602022],"y":[0.0102988518862105],"text":"Standard_Deviation: 0.05648144<br />Historic_Expected_Returns: 0.010298852<br />symbol: CVX","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(219,142,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(219,142,0,1)"}},"hoveron":"points","name":"CVX","legendgroup":"CVX","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.142856429166848],"y":[0.00766315018383157],"text":"Standard_Deviation: 0.14285643<br />Historic_Expected_Returns: 0.007663150<br />symbol: F","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(174,162,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(174,162,0,1)"}},"hoveron":"points","name":"F","legendgroup":"F","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0809011177641166],"y":[0.00818598091681155],"text":"Standard_Deviation: 0.08090112<br />Historic_Expected_Returns: 0.008185981<br />symbol: HPQ","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(100,178,0,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(100,178,0,1)"}},"hoveron":"points","name":"HPQ","legendgroup":"HPQ","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0392746390101565],"y":[0.00858347389704425],"text":"Standard_Deviation: 0.03927464<br />Historic_Expected_Returns: 0.008583474<br />symbol: JNJ","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,189,92,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,189,92,1)"}},"hoveron":"points","name":"JNJ","legendgroup":"JNJ","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0764368370670221],"y":[0.0106919728730969],"text":"Standard_Deviation: 0.07643684<br />Historic_Expected_Returns: 0.010691973<br />symbol: JPM","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,193,167,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,193,167,1)"}},"hoveron":"points","name":"JPM","legendgroup":"JPM","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0649313113527261],"y":[0.0123988642411625],"text":"Standard_Deviation: 0.06493131<br />Historic_Expected_Returns: 0.012398864<br />symbol: MSFT","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,222,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,186,222,1)"}},"hoveron":"points","name":"MSFT","legendgroup":"MSFT","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0405141205595534],"y":[0.00837891133158656],"text":"Standard_Deviation: 0.04051412<br />Historic_Expected_Returns: 0.008378911<br />symbol: PEP","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,166,255,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,166,255,1)"}},"hoveron":"points","name":"PEP","legendgroup":"PEP","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0421689244030966],"y":[0.00731449524166524],"text":"Standard_Deviation: 0.04216892<br />Historic_Expected_Returns: 0.007314495<br />symbol: PG","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(179,133,255,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(179,133,255,1)"}},"hoveron":"points","name":"PG","legendgroup":"PG","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0534867567311974],"y":[0.00876348779581469],"text":"Standard_Deviation: 0.05348676<br />Historic_Expected_Returns: 0.008763488<br />symbol: RTX","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(239,103,235,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(239,103,235,1)"}},"hoveron":"points","name":"RTX","legendgroup":"RTX","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.0368906853732308],"y":[0.00581216807670323],"text":"Standard_Deviation: 0.03689069<br />Historic_Expected_Returns: 0.005812168<br />symbol: TLT","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(255,99,182,1)","opacity":1,"size":18.8976377952756,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(255,99,182,1)"}},"hoveron":"points","name":"TLT","legendgroup":"TLT","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":54.7945205479452},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":" Monthly Historic Risk-Return Tradeoff","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.03159239818355,0.148154716356529],"tickmode":"array","ticktext":["0.06","0.09","0.12"],"tickvals":[0.06,0.09,0.12],"categoryorder":"array","categoryarray":["0.06","0.09","0.12"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Volatility","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.00542814667829024,0.0138766174433759],"tickmode":"array","ticktext":["0.006","0.008","0.010","0.012"],"tickvals":[0.006,0.008,0.01,0.012],"categoryorder":"array","categoryarray":["0.006","0.008","0.010","0.012"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Expected Returns","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"title":{"text":"symbol","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"dbd30193efb":{"x":{},"y":{},"colour":{},"type":"scatter"}},"cur_data":"dbd30193efb","visdat":{"dbd30193efb":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p><strong>Calculation of Excess Returns</strong></p>
@@ -439,17 +439,17 @@ Tip
 # Groups:   symbol [11]
    symbol date       Excess_Returns
    &lt;chr&gt;  &lt;date&gt;              &lt;dbl&gt;
- 1 TLT    2024-03-18       -0.0189 
- 2 MSFT   2024-03-18       -0.00350
- 3 HPQ    2024-03-18        0.0582 
- 4 COST   2024-03-18       -0.0301 
- 5 F      2024-03-18       -0.0286 
- 6 PEP    2024-03-18        0.0274 
- 7 JPM    2024-03-18        0.0248 
- 8 RTX    2024-03-18        0.0335 
- 9 PG     2024-03-18        0.00697
-10 CVX    2024-03-18        0.0121 
-11 JNJ    2024-03-18       -0.0372 </code></pre>
+ 1 TLT    2024-03-19       -0.0161 
+ 2 MSFT   2024-03-19        0.00639
+ 3 HPQ    2024-03-19        0.0539 
+ 4 COST   2024-03-19       -0.0292 
+ 5 F      2024-03-19       -0.0189 
+ 6 PEP    2024-03-19        0.0307 
+ 7 JPM    2024-03-19        0.0309 
+ 8 RTX    2024-03-19        0.0491 
+ 9 PG     2024-03-19        0.0109 
+10 CVX    2024-03-19        0.0200 
+11 JNJ    2024-03-19       -0.0406 </code></pre>
 </div>
 </div>
 <p>We compute two matrices essential for our optimization process: the variance-covariance matrix and the correlation matrix. Each value within these matrices is derived from the following respective equations:</p>
@@ -495,17 +495,17 @@ Corr: \frac{\Sigma}{\sigma^T \sigma}
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>         TLT   MSFT    HPQ   COST      F    PEP     JPM     RTX     PG     CVX
-TLT   0.0022 0.0011 0.0002 0.0013 0.0006 0.0003 -0.0003 -0.0005 0.0001 -0.0008
-MSFT  0.0011 0.0040 0.0026 0.0021 0.0032 0.0013  0.0018  0.0016 0.0012  0.0015
-HPQ   0.0002 0.0026 0.0084 0.0016 0.0045 0.0013  0.0039  0.0031 0.0011  0.0035
-COST  0.0013 0.0021 0.0016 0.0041 0.0037 0.0013  0.0014  0.0010 0.0012  0.0014
-F     0.0006 0.0032 0.0045 0.0037 0.0171 0.0021  0.0064  0.0037 0.0011  0.0067
+TLT   0.0022 0.0010 0.0003 0.0013 0.0006 0.0003 -0.0003 -0.0005 0.0001 -0.0008
+MSFT  0.0010 0.0040 0.0027 0.0021 0.0032 0.0013  0.0018  0.0016 0.0012  0.0015
+HPQ   0.0003 0.0027 0.0084 0.0016 0.0045 0.0013  0.0039  0.0031 0.0012  0.0035
+COST  0.0013 0.0021 0.0016 0.0041 0.0037 0.0013  0.0014  0.0010 0.0012  0.0013
+F     0.0006 0.0032 0.0045 0.0037 0.0170 0.0021  0.0064  0.0037 0.0011  0.0067
 PEP   0.0003 0.0013 0.0013 0.0013 0.0021 0.0021  0.0014  0.0019 0.0016  0.0020
 JPM  -0.0003 0.0018 0.0039 0.0014 0.0064 0.0014  0.0065  0.0042 0.0010  0.0050
 RTX  -0.0005 0.0016 0.0031 0.0010 0.0037 0.0019  0.0042  0.0074 0.0017  0.0048
-PG    0.0001 0.0012 0.0011 0.0012 0.0011 0.0016  0.0010  0.0017 0.0026  0.0010
-CVX  -0.0008 0.0015 0.0035 0.0014 0.0067 0.0020  0.0050  0.0048 0.0010  0.0093
-JNJ  -0.0001 0.0012 0.0012 0.0009 0.0015 0.0014  0.0016  0.0017 0.0013  0.0021
+PG    0.0001 0.0012 0.0012 0.0012 0.0011 0.0016  0.0010  0.0017 0.0026  0.0010
+CVX  -0.0008 0.0015 0.0035 0.0013 0.0067 0.0020  0.0050  0.0048 0.0010  0.0093
+JNJ  -0.0001 0.0012 0.0012 0.0009 0.0015 0.0014  0.0016  0.0016 0.0013  0.0021
          JNJ
 TLT  -0.0001
 MSFT  0.0012
@@ -514,7 +514,7 @@ COST  0.0009
 F     0.0015
 PEP   0.0014
 JPM   0.0016
-RTX   0.0017
+RTX   0.0016
 PG    0.0013
 CVX   0.0021
 JNJ   0.0024</code></pre>
@@ -543,29 +543,29 @@ JNJ   0.0024</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>         TLT    MSFT     HPQ    COST       F     PEP     JPM     RTX      PG
-TLT  100.000  35.842   5.817  44.883  10.673  15.342  -7.346 -12.845   5.357
-MSFT  35.842 100.000  45.846  51.514  39.485  44.252  35.511  29.832  37.324
-HPQ    5.817  45.846 100.000  27.962  37.762  32.054  52.444  38.962  24.309
-COST  44.883  51.514  27.962 100.000  44.728  44.217  26.540  17.660  35.221
-F     10.673  39.485  37.762  44.728 100.000  35.504  61.046  32.734  16.498
-PEP   15.342  44.252  32.054  44.217  35.504 100.000  38.843  47.241  67.462
-JPM   -7.346  35.511  52.444  26.540  61.046  38.843 100.000  60.866  25.247
-RTX  -12.845  29.832  38.962  17.660  32.734  47.241  60.866 100.000  37.344
-PG     5.357  37.324  24.309  35.221  16.498  67.462  25.247  37.344 100.000
-CVX  -17.916  24.219  39.735  22.026  53.042  44.369  63.913  57.958  19.748
-JNJ   -5.135  38.110  25.718  27.999  23.067  63.610  41.401  39.104  49.764
+TLT  100.000  35.793   5.893  44.834  10.627  15.371  -7.343 -12.843   5.341
+MSFT  35.793 100.000  46.045  51.380  39.426  44.383  35.567  29.881  37.342
+HPQ    5.893  46.045 100.000  28.037  37.880  32.062  52.497  39.051  24.379
+COST  44.834  51.380  28.037 100.000  44.668  44.131  26.464  17.462  35.147
+F     10.627  39.426  37.880  44.668 100.000  35.536  61.046  32.677  16.481
+PEP   15.371  44.383  32.062  44.131  35.536 100.000  38.913  47.384  67.494
+JPM   -7.343  35.567  52.497  26.464  61.046  38.913 100.000  60.901  25.284
+RTX  -12.843  29.881  39.051  17.462  32.677  47.384  60.901 100.000  37.378
+PG     5.341  37.342  24.379  35.147  16.481  67.494  25.284  37.378 100.000
+CVX  -17.929  24.242  39.810  21.944  53.031  44.432  63.935  57.973  19.775
+JNJ   -5.181  37.920  25.700  28.033  22.994  63.349  41.226  38.731  49.610
          CVX     JNJ
-TLT  -17.916  -5.135
-MSFT  24.219  38.110
-HPQ   39.735  25.718
-COST  22.026  27.999
-F     53.042  23.067
-PEP   44.369  63.610
-JPM   63.913  41.401
-RTX   57.958  39.104
-PG    19.748  49.764
-CVX  100.000  44.973
-JNJ   44.973 100.000</code></pre>
+TLT  -17.929  -5.181
+MSFT  24.242  37.920
+HPQ   39.810  25.700
+COST  21.944  28.033
+F     53.031  22.994
+PEP   44.432  63.349
+JPM   63.935  41.226
+RTX   57.973  38.731
+PG    19.775  49.610
+CVX  100.000  44.807
+JNJ   44.807 100.000</code></pre>
 </div>
 </div>
 <p>We run a <em>Principal Component Analysis</em> calculation to display the groupings and correlations among the various assets in the pearl fund. The graph below displays the groups of closely related or correlated associations with certain stocks. The horizontal axis (Comp.1) and the vertical axis (Comp.2) represent the first two principal components derived from the PCA. These are the two dimensions that capture the most variance in the data set. From an investment standpoint, this plot might help in understanding which stocks move together (correlated), and potentially, it might help in identifying which stocks contribute most to the variance in the portfolio. This could be used for risk management and diversification; for instance, once might choose to invest in stocks that are less correlated with each other according to the PCA results. For example, the biplot shows that <strong><code>TLT</code></strong>, which is an ETF that tracks long-term treasury bonds, has a very different loading compared to other assets, indicating that its price movements are likely less correlated with those of the stocks.</p>
@@ -645,8 +645,8 @@ JNJ   44.973 100.000</code></pre>
 240 2023-12-29          4.565537
 239 2023-11-30          9.134381
 238 2023-10-31         -2.170868
-237 2023-09-29         -4.743442
-236 2023-08-31         -1.625202</code></pre>
+237 2023-09-29         -4.743448
+236 2023-08-31         -1.625195</code></pre>
 </div>
 </div>
 <p><strong>NASDAQ (Monthly % Returns):</strong></p>
@@ -671,8 +671,8 @@ JNJ   44.973 100.000</code></pre>
 <pre><code>          date NASDAQPercentReturns
 240 2023-12-29             5.586963
 239 2023-11-30            10.818825
-238 2023-10-31            -2.065488
-237 2023-09-29            -5.079859
+238 2023-10-31            -2.065480
+237 2023-09-29            -5.079867
 236 2023-08-31            -1.483012</code></pre>
 </div>
 </div>
@@ -795,11 +795,11 @@ optimize.portfolio(R = stock_returns_monthly_full_wide, portfolio = pearlfund,
 
 Optimal Weights:
    TLT   MSFT    HPQ   COST      F    PEP    JPM    RTX     PG    CVX    JNJ 
-0.2966 0.1328 0.0000 0.2159 0.0000 0.0137 0.0612 0.0000 0.1199 0.0808 0.0791 
+0.2969 0.1336 0.0000 0.2155 0.0000 0.0137 0.0613 0.0000 0.1205 0.0813 0.0773 
 
 Objective Measure:
     mean 
-0.009853 
+0.009872 
 
 
  StdDev 
@@ -822,13 +822,11 @@ Objective Measure:
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>optimized_list_of_weights <span class="ot">=</span> opt_maxret[<span class="dv">1</span>]<span class="sc">$</span>weights</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>optimized_vector_of_weights <span class="ot">=</span> <span class="fu">unlist</span>(optimized_list_of_weights)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>optimized_vector_of_weights</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span> <span class="sc">*</span> <span class="fu">round</span>(optimized_vector_of_weights, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>         TLT         MSFT          HPQ         COST            F          PEP 
-2.965686e-01 1.328087e-01 3.652409e-21 2.158549e-01 4.052203e-19 1.372430e-02 
-         JPM          RTX           PG          CVX          JNJ 
-6.119187e-02 5.797657e-18 1.199263e-01 8.084006e-02 7.908532e-02 </code></pre>
+<pre><code>   TLT   MSFT    HPQ   COST      F    PEP    JPM    RTX     PG    CVX    JNJ 
+29.686 13.359  0.000 21.552  0.000  1.375  6.126  0.000 12.046  8.130  7.728 </code></pre>
 </div>
 </div>
 <section id="optimized-portfolio-visualizations" class="level2">
@@ -996,7 +994,7 @@ Objective Measure:
 <span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Annualized Return:"</span>, annualized_return)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Annualized Return: 12.4864553377463%</code></pre>
+<pre><code>Annualized Return: 12.5114169425446%</code></pre>
 </div>
 </div>
 </section>
@@ -1032,7 +1030,7 @@ Objective Measure:
 1 2019-03-29                  0.0655            0.0181
 2 2019-02-28                  0.0282            0.0324
 3 2019-01-31                  0.0403            0.0801
-4 2018-12-31                 -0.0781           -0.0880
+4 2018-12-31                 -0.0780           -0.0880
 5 2018-11-30                  0.0319            0.0185</code></pre>
 </div>
 <details>
@@ -1047,7 +1045,7 @@ Objective Measure:
 1 2019-03-29                  0.0655              0.0392 
 2 2019-02-28                  0.0282              0.0299 
 3 2019-01-31                  0.0403              0.0901 
-4 2018-12-31                 -0.0781             -0.0866 
+4 2018-12-31                 -0.0780             -0.0866 
 5 2018-11-30                  0.0319             -0.00265</code></pre>
 </div>
 </div>
@@ -1069,7 +1067,7 @@ Objective Measure:
 1 2019-03-29                  0.0655            0.0181              0.0392 
 2 2019-02-28                  0.0282            0.0324              0.0299 
 3 2019-01-31                  0.0403            0.0801              0.0901 
-4 2018-12-31                 -0.0781           -0.0880             -0.0866 
+4 2018-12-31                 -0.0780           -0.0880             -0.0866 
 5 2018-11-30                  0.0319            0.0185             -0.00265</code></pre>
 </div>
 </div>
@@ -1103,20 +1101,20 @@ Objective Measure:
 <span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(statisticsA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>  ActivePremium  Alpha AnnualizedAlpha  Beta  Beta-  Beta+ Correlation
-1        0.0268 0.0055          0.0675 0.498 0.5017 0.4153      0.7008
+<pre><code>  ActivePremium  Alpha AnnualizedAlpha   Beta  Beta-  Beta+ Correlation
+1        0.0268 0.0055          0.0675 0.4982 0.5015 0.4154       0.701
   Correlationp-value InformationRatio R-squared TrackingError TreynorRatio
-1                  0           0.2783    0.4912        0.0963       0.2235</code></pre>
+1                  0           0.2783    0.4914        0.0963       0.2235</code></pre>
 </div>
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(statisticsB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>  ActivePremium  Alpha AnnualizedAlpha   Beta Beta- Beta+ Correlation
-1       -0.0084 0.0055          0.0681 0.3477 0.318 0.288      0.6162
+<pre><code>  ActivePremium  Alpha AnnualizedAlpha   Beta Beta-  Beta+ Correlation
+1       -0.0084 0.0055          0.0681 0.3479 0.318 0.2881      0.6166
   Correlationp-value InformationRatio R-squared TrackingError TreynorRatio
-1                  0          -0.0623    0.3797        0.1342       0.3202</code></pre>
+1                  0          -0.0623    0.3802        0.1342         0.32</code></pre>
 </div>
 </div>
 <hr>
@@ -1273,12 +1271,12 @@ Objective Measure:
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          Ret         Risk        ETL
-1 0.009231216 0.0022009310 0.01257818
-2 0.008707594 0.0014687429 0.01283904
-3 0.008848691 0.0008368538 0.01247632
-4 0.009423036 0.0017632337 0.01257605
-5 0.008741978 0.0008614042 0.01258436
-6 0.010092216 0.0021418932 0.01274313</code></pre>
+1 0.010007448 0.0010695432 0.01271741
+2 0.008519308 0.0028574782 0.01289266
+3 0.008311751 0.0010478847 0.01269162
+4 0.008467422 0.0012169512 0.01288086
+5 0.008985747 0.0011551283 0.01263191
+6 0.008208362 0.0007246921 0.01269241</code></pre>
 </div>
 </div>
 <p>Finally, we plot these ETL values against our return values for our portfolios and are able to visualize the results. By plotting ETL vs.&nbsp;Expected Return, you can assess whether the expected returns of the portfolio adequately compensates for the potential magnitude of extreme losses.</p>
