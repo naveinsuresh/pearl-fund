@@ -43,7 +43,9 @@ Our approach involves the utilization of sophisticated financial models, which w
 
 Once you're familiarized with the code, feel free to explore and add your own curated collections of assets to see how they perform! To this make sure to enter the *exchange traded ticker symbols* to the *stock_tickers* vector in the second cell below. You must ensure that the assets you choose were traded on an exchange from a minimum of 2004 onward.
 
-Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project:
+``` R
+Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project. Be sure to use install.packages() for any of the uninstalled packages below.
+```
 
 ```{r}
 suppressWarnings(suppressPackageStartupMessages({
@@ -66,7 +68,6 @@ suppressWarnings(suppressPackageStartupMessages({
   require(ROI.plugin.glpk)
   require(ROI.plugin.quadprog)
 }))
-
 ```
 
 # Equity Analysis
@@ -118,10 +119,8 @@ stock_returns_monthly_long = stock_returns_monthly_raw %>% group_by(symbol) %>% 
 stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=symbol, values_from=MonthlyReturns)
 
 # Displays the most recent 5 monthly stock returns
-stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
-as.data.frame(head(stock_returns_monthly_wide_decreasing, 5)) %>%
-  kbl(caption = "Returns for past 5 months") %>%
-  kable_classic(full_width = F, html_font = "Cambria")
+# stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
+# as.data.frame(head(stock_returns_monthly_wide_decreasing, 5)) %>% kbl(caption = "Returns for past 5 months") %>% kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 years.
@@ -133,11 +132,11 @@ stock_returns_monthly_test_long = stock_returns_monthly_test_raw %>% group_by(sy
 
 stock_returns_monthly_test_wide = pivot_wider(stock_returns_monthly_test_long, names_from=symbol, values_from=MonthlyReturns2nd)
 
-stock_returns_monthly_test_wide_decreasing =  stock_returns_monthly_test_wide[order(stock_returns_monthly_test_wide$date, decreasing = TRUE), ]
-as.data.frame(head(stock_returns_monthly_test_wide_decreasing, 5))
+# stock_returns_monthly_test_wide_decreasing =  stock_returns_monthly_test_wide[order(stock_returns_monthly_test_wide$date, decreasing = TRUE), ]
+# as.data.frame(head(stock_returns_monthly_test_wide_decreasing, 5))
 ```
 
-## **Stock Growth & Monthly Returns (Graph View)**
+## Stock Growth & Monthly Returns (Graph View)
 
 Displayed below is a graphical representation of the total returns (%) for our chosen stocks covering the chosen time period. To facilitate accurate time series analysis, the data has been standardized.
 
@@ -377,8 +376,10 @@ Next, using our optimization libraries we create a portfolio object where we wil
 *Comments on Objectives*
 
 1.  Return -\> aims to create a portfolio to maximize the return
-2.  Risk Aversion Parameter -\> sets the level of risk aversion for the optimization. A higher risk aversion value indicates a greater emphasis on minimizing risk in the portfolio.
+2.  Risk Aversion Parameter -\> sets the level of risk aversion for the optimization. A higher risk aversion value indicates a greater emphasis on minimizing risk in the portfolio (ranges from 1-10)
 3.  Risk -\> aims to create a portfolio which minimizes the risk (StdDev, var, etc..)
+
+For the *Pearl Fund*, we will optimize for maximizing our expected return while minimizing our variance given a risk aversion (delta) value of 5. Feel free to use your own set of constraints and objectives for your own portfolio.
 
 ```{r}
 pearlfund = portfolio.spec(assets = assets)
@@ -394,7 +395,7 @@ pearlfund <- add.constraint(portfolio=pearlfund, type="box", min=0.00, max=1)
 # OBJECTIVES
 
 pearlfund = add.objective(portfolio=pearlfund, type='return', name='mean')
-pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=7)
+pearlfund = add.objective(portfolio = pearlfund, type='risk', name="var", risk_aversion=5)
 # pearlfund = add.objective(pearlfund, type = "risk", name = "StdDev")
 
 # OPTIMIZE.PORTFOLIO
