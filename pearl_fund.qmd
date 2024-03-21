@@ -61,6 +61,7 @@ suppressWarnings(suppressPackageStartupMessages({
   library(ROI)
   library(tseries)
   library(TTR)
+  library(kableExtra)
   library(fPortfolio)
   require(ROI.plugin.glpk)
   require(ROI.plugin.quadprog)
@@ -98,7 +99,9 @@ stock_returns_monthly_full_wide = pivot_wider(stock_returns_monthly_full_long, n
 
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_full_wide_decreasing =  stock_returns_monthly_full_wide[order(stock_returns_monthly_full_wide$date, decreasing = TRUE), ]
-as.data.frame(head(stock_returns_monthly_full_wide_decreasing, 5))
+as.data.frame(head(stock_returns_monthly_full_wide_decreasing, 5)) %>%
+  kbl(caption = "Returns for past 5 months") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 
 ```
 
@@ -116,7 +119,9 @@ stock_returns_monthly_wide = pivot_wider(stock_returns_monthly_long, names_from=
 
 # Displays the most recent 5 monthly stock returns
 stock_returns_monthly_wide_decreasing =  stock_returns_monthly_wide[order(stock_returns_monthly_wide$date, decreasing = TRUE), ]
-as.data.frame(head(stock_returns_monthly_wide_decreasing, 5))
+as.data.frame(head(stock_returns_monthly_wide_decreasing, 5)) %>%
+  kbl(caption = "Returns for past 5 months") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 We repeat the above process for the 2nd batch of monthly stock returns which lasts for the last 5 years.
@@ -176,7 +181,9 @@ We calculate the expected returns (based off historical returns), standard devia
 
 ```{r}
 Stock_Statistics = stock_returns_monthly_long %>% group_by(symbol)  %>% summarise(Historic_Expected_Returns = mean(`MonthlyReturns`), Standard_Deviation = sd(`MonthlyReturns`), Variance = VAR(`MonthlyReturns`), Count = n())
-Stock_Statistics 
+Stock_Statistics %>%
+  kbl(caption = "Stock Statistics") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 ```{r}
@@ -295,7 +302,9 @@ spy_returns_monthly_percentages = data.frame("date" = spy_returns_monthly$date, 
 # Displays the most recent 5 monthly SPY returns (%)
 spy_returns_monthly_percentages_decreasing =  spy_returns_monthly_percentages[order(spy_returns_monthly_percentages$date, decreasing = TRUE), ]
 
-head(spy_returns_monthly_percentages_decreasing[, c("date", "SPYPercentReturns")], 5)
+head(spy_returns_monthly_percentages_decreasing[, c("date", "SPYPercentReturns")], 5)%>%
+  kbl(caption = "SPY returns for past 5 months") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 **NASDAQ (Monthly % Returns):**
@@ -313,7 +322,9 @@ nasdaq_returns_monthly_percentages = data.frame("date" = nasdaq_returns_monthly$
 # Displays the most recent 5 monthly NASDAQ returns (%)
 nasdaq_returns_monthly_percentages_decreasing =  nasdaq_returns_monthly_percentages[order(nasdaq_returns_monthly_percentages$date, decreasing = TRUE), ]
 
-head(nasdaq_returns_monthly_percentages_decreasing[, c("date", "NASDAQPercentReturns")], 5)
+head(nasdaq_returns_monthly_percentages_decreasing[, c("date", "NASDAQPercentReturns")], 5)%>%
+  kbl(caption = " NASDAQ returns for past 5 months") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 The line graph below illustrates the price trends over our time period for the benchmark returns — SPY and QQQ. As before, we standardize the index prices to facilitate a more effective comparison.
@@ -351,7 +362,7 @@ The groundwork laid by our analysis and statistical metrics sets the stage for t
 ```{r}
 init_weights = rep((1/length(stock_tickers)), length(stock_tickers))
 assets = setNames(init_weights, stock_tickers)
-assets
+assets 
 ```
 
 Next, using our optimization libraries we create a portfolio object where we will input our asset, initialized weights, portfolio constraints, and our objectives. Our desired outcome will be a vector of weights which optimizes for our objectives under our desired constraints.
@@ -558,7 +569,9 @@ three_fund_combined_table_of_returns = left_join(spy_combined_table_of_returns, 
 
 three_fund_combined_table_of_returns_decreasing <- arrange(three_fund_combined_table_of_returns, desc(date))
 
-head(three_fund_combined_table_of_returns_decreasing, 5)
+head(three_fund_combined_table_of_returns_decreasing, 5)%>%
+  kbl(caption = "Combined returns for past 5 months") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 This is a great display of a side by side view of the monthly returns for our three funds of comparison for our time period of interest. The following visuals are a great measure of the overall volatility of our portfolio compared to the two benchmarks. Graphs that display more "ups" and "downs" with monthly returns indicate larger deviations from the mean. Given similar annualized returns and expected long term value, a risk-averse investor should prefer the portfolios/funds which minimize the volatility/risk for the given time period.
@@ -583,8 +596,12 @@ statisticsA = spy_combined_table_of_returns %>% tq_performance(Ra = `AggregateMo
 # Pearl Fund vs. NASDAQ
 statisticsB = nasdaq_combined_table_of_returns %>% tq_performance(Ra = `AggregateMonthlyReturns`, Rb = `NASDAQMonthlyReturns`, performance_fun = table.CAPM)
 
-as.data.frame(statisticsA)
-as.data.frame(statisticsB)
+as.data.frame(statisticsA) %>%
+  kbl(caption = "Pearl Fund Against SPY") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+as.data.frame(statisticsB) %>%
+  kbl(caption = "Pearl Fund Against NASDAQ") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 ------------------------------------------------------------------------
@@ -600,7 +617,9 @@ stock_returns_monthly_wide_dateless = stock_returns_monthly_wide[, -1]
 
 stock_returns_monthly_wide_decreasing <- arrange(stock_returns_monthly_wide, desc(date))
 
-head(stock_returns_monthly_wide_decreasing[, -1], 5)
+head(stock_returns_monthly_wide_decreasing[, -1], 5) %>%
+  kbl() %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 The next step is to simulate, using a loop, a series of random weights which we then apply certain matrices to. The result is a data frame which stores the list of returns and risk values for portfolios of different weights.
@@ -710,7 +729,9 @@ We add these ETL values to our data frame of Returns and Risk for our various po
 ```{r}
 # Add ETL to this table
 d_p1 = mutate(d_p1, ETL = etl_values)
-head(d_p1)
+head(d_p1) %>%
+  kbl(caption = "Monte Carlo Simulation") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 Finally, we plot these ETL values against our return values for our portfolios and are able to visualize the results. By plotting ETL vs. Expected Return, you can assess whether the expected returns of the portfolio adequately compensates for the potential magnitude of extreme losses.
@@ -741,12 +762,14 @@ ggplot() +
   geom_line(data = aggregate_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
             linewidth = 2, color = "red") +
   geom_smooth(data = aggregate_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
-              method = "loess", color = "red", se = FALSE) +
+              method = "loess", color = "red", se = FALSE) +  
+  annotate(geom = "text", x = as.Date("2017-03-01"), y = 100000, 
+           label = "Optimized\nPortfolio", color = "red") +
   geom_line(data = equally_weighted_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
             linewidth = 2, color = "blue") +
   geom_smooth(data = equally_weighted_portfolio_monthly_returns_growth, aes(x = date, y = investment.growth), 
               method = "loess", color = "blue", se = FALSE) +
-  annotate(geom = "text", x = as.Date("2019-03-01"), y = 35000, 
+  annotate(geom = "text", x = as.Date("2023-03-01"), y = 35000, 
            label = "Equally\nWeighted", color = "blue") +
   labs(title = "Pearl Fund Optimized Portfolio Growth vs. Equally Weighted Portfolio",
        subtitle = ,
