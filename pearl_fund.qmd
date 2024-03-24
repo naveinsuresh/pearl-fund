@@ -43,7 +43,7 @@ Our approach involves the utilization of sophisticated financial models, which w
 
 Once you're familiarized with the code, feel free to explore and add your own curated collections of assets to see how they perform! To this make sure to enter the *exchange traded ticker symbols* to the *stock_tickers* vector in the second cell below. You must ensure that the assets you choose were traded on an exchange from a minimum of 2004 onward.
 
-``` R
+``` r
 Before proceeding, ensure that the following libraries are installed and imported for seamless execution of the project. Be sure to use install.packages() for any of the uninstalled packages below.
 ```
 
